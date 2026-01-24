@@ -2,7 +2,7 @@
 /* Match 3 HUD */
 #match3-hud {
     position: absolute;
-    top: 60px;
+    top: 100px; /* Moved down to avoid overlap with Back button */
     left: 0;
     width: 100%;
     display: flex;

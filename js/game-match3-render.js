@@ -40,6 +40,7 @@ class Match3Game {
 
     start() {
         this.isPlaying = true;
+        this.updateUI();
         this.lastTime = performance.now();
         requestAnimationFrame(this.loop.bind(this));
     }
@@ -224,6 +225,12 @@ class Match3Game {
     }
 
     draw() {
+        // Ensure canvas has size
+        if (this.canvas.width === 0 || this.canvas.height === 0) {
+            // Try to resize if 0
+            this.resize();
+        }
+
         this.ctx.clearRect(0, 0, this.canvas.width, this.canvas.height);
 
         // Draw Board Background
@@ -360,3 +367,5 @@ class Match3Game {
         }
     }
 }
+
+window.Match3Game = Match3Game;
