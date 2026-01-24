@@ -14,7 +14,8 @@
     background: rgba(0, 50, 0, 0.3);
     border-radius: 20px;
     margin-top: 50px; /* Header space */
-    overflow: hidden; /* Prevent overflow */
+    overflow: visible; /* Allow floating elements/badges to be seen */
+    position: relative;
 }
 
 /* Top: Jokers */
@@ -320,13 +321,15 @@
 .poker-card.enhanced-mult::after {
     content: '+4 Mult';
     position: absolute;
-    bottom: -15px;
+    bottom: -18px;
     left: 0;
     width: 100%;
-    font-size: 10px;
+    font-size: 9px;
     background: #ff5555;
     color: white;
     border-radius: 4px;
+    padding: 1px 0;
+    z-index: 5;
 }
 
 .poker-card.enhanced-bonus {
@@ -336,13 +339,15 @@
 .poker-card.enhanced-bonus::after {
     content: '+20 Chips';
     position: absolute;
-    bottom: -15px;
+    bottom: -18px;
     left: 0;
     width: 100%;
-    font-size: 10px;
+    font-size: 9px;
     background: #55aaff;
     color: white;
     border-radius: 4px;
+    padding: 1px 0;
+    z-index: 5;
 }
 
 .poker-card.trigger-flash {

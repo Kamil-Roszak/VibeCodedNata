@@ -286,18 +286,25 @@ class BalatroView {
 
         const breakdown = result.score.breakdown || [];
 
+        // Initial Pause to see cards played
+        await delay(300);
+
         for (const step of breakdown) {
-            await delay(400); // Pace of animation
+            await delay(500); // Slower pace for visibility
 
             if (step.source === 'card') {
                 // Find card element
                 const cardEl = playedCardsEls.find(el => parseInt(el.dataset.cardId) === step.card.id);
                 if (cardEl) {
+                    // Force reflow to ensure animation triggers if repeated?
+                    cardEl.classList.remove('trigger-flash');
+                    void cardEl.offsetWidth; // trigger reflow
                     cardEl.classList.add('trigger-flash');
-                    setTimeout(() => cardEl.classList.remove('trigger-flash'), 300);
 
                     // Show floating text
-                    this.showFloatingText(cardEl, `+${step.chips}`);
+                    if (step.chips > 0) {
+                        this.showFloatingText(cardEl, `+${step.chips}`);
+                    }
                 }
             } else if (step.source === 'joker') {
                 // Find Joker Element
@@ -305,14 +312,24 @@ class BalatroView {
                 const jokerIndex = this.game.jokerManager.jokers.findIndex(j => j.id === step.joker.id);
                 if (jokerIndex >= 0 && jokers[jokerIndex]) {
                      const el = jokers[jokerIndex];
+                     el.classList.remove('trigger-shake');
+                     void el.offsetWidth;
                      el.classList.add('trigger-shake');
-                     setTimeout(() => el.classList.remove('trigger-shake'), 400);
+                     setTimeout(() => el.classList.remove('trigger-shake'), 400); // Cleanup
                 }
             }
 
             // Update Stats
-            this.elChips.innerText = step.chips; // Should we tween this?
+            this.elChips.innerText = step.chips;
             this.elMult.innerText = step.mult;
+
+            // Pulse the stats
+            this.elChips.classList.remove('score-pop');
+            this.elMult.classList.remove('score-pop');
+            void this.elChips.offsetWidth;
+            this.elChips.classList.add('score-pop');
+            this.elMult.classList.add('score-pop');
+
             displayedChips = step.chips;
             displayedMult = step.mult;
         }
