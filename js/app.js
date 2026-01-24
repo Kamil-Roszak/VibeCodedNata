@@ -292,7 +292,21 @@ function navigateTo(viewId) {
     if (viewId === 'level-select-view' && window.levelSelectView) {
         window.levelSelectView.render();
     }
+
+    if (viewId === 'balatro-view' && window.startBalatro) {
+        // Delay to allow DOM update
+        setTimeout(() => window.startBalatro(), 0);
+    }
 }
+
+// Ensure Balatro is accessible
+window.startBalatro = window.startBalatro || function() { console.error("Balatro not loaded"); };
+
+// Debug hook
+document.addEventListener('DOMContentLoaded', () => {
+    // If navigating to balatro view via hash or debug, init
+    // Actually our SPA uses onclick.
+});
 
 function renderShop() {
     const container = document.getElementById('shop-list');

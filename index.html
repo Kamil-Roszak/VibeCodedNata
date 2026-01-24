@@ -7,6 +7,7 @@
     <link rel="stylesheet" href="css/ui.css">
     <link rel="stylesheet" href="css/style.css">
     <link rel="stylesheet" href="css/match3.css">
+    <link rel="stylesheet" href="css/balatro.css">
 </head>
 <body>
     <div id="bg-container"></div>
@@ -25,8 +26,80 @@
                 <div class="menu-buttons">
                     <button class="nata-btn nata-btn-primary" data-nav="game-view">PLAY NATA CATCH</button>
                     <button class="nata-btn nata-btn-primary" data-nav="level-select-view">PLAY NATA CRUSH</button>
+                    <button class="nata-btn nata-btn-blue" data-nav="balatro-view" onclick="startBalatro()">PLAY NATA POKER</button>
                     <button class="nata-btn nata-btn-secondary" data-nav="shop-view">BADGE SHOP</button>
                     <button class="nata-btn nata-btn-secondary" data-nav="profile-view">MY PROFILE</button>
+                </div>
+            </div>
+        </section>
+
+        <!-- Nata Poker (Balatro) View -->
+        <section id="balatro-view" class="view-section hidden-view">
+            <button class="nata-btn nata-btn-secondary" style="position: absolute; top: 60px; left: 20px; z-index: 200; padding: 5px 15px; font-size: 14px;" data-nav="menu-view">Exit</button>
+
+            <div class="balatro-container">
+                <!-- Top: Jokers -->
+                <div class="balatro-top-bar">
+                    <div id="b-jokers-area" class="joker-slots">
+                        <!-- Filled by JS -->
+                    </div>
+                    <div class="round-info">
+                        <div class="info-box">
+                            <span class="label">Round</span>
+                            <span id="b-round" class="value">1</span>
+                        </div>
+                        <div class="info-box">
+                            <span class="label">Money</span>
+                            <span id="b-money" class="value">$0</span>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Middle: Score -->
+                <div class="balatro-score-area">
+                    <div class="score-display">
+                        <div class="score-row">
+                            <span id="b-chips" class="score-chips">0</span>
+                            <span class="x">X</span>
+                            <span id="b-mult" class="score-mult">0</span>
+                        </div>
+                        <div class="score-total" id="b-current-score">0</div>
+                    </div>
+                    <div class="target-display">
+                        Target: <span id="b-target-score">300</span>
+                    </div>
+                </div>
+
+                <!-- Bottom: Play Area & Hand -->
+                <div class="balatro-play-area">
+                    <!-- Cards selected to play appear here visually? Or just highlighted in hand?
+                         Balatro moves them up. Let's replicate that. -->
+                    <div id="b-play-slots" class="card-row play-slots"></div>
+
+                    <div class="action-buttons">
+                        <button id="b-play-btn" class="nata-btn nata-btn-primary">PLAY HAND (<span id="b-hands-left">4</span>)</button>
+                        <button id="b-discard-btn" class="nata-btn nata-btn-secondary">DISCARD (<span id="b-discards-left">4</span>)</button>
+                    </div>
+
+                    <div id="b-hand-area" class="card-row hand-area">
+                        <!-- Cards -->
+                    </div>
+                </div>
+
+                <!-- Shop Overlay -->
+                <div id="b-shop-overlay" class="nata-overlay" style="width: 80%; max-width: 800px;">
+                    <h1>Nata Shop</h1>
+                    <p>Money: <span id="b-shop-money">$0</span></p>
+                    <div id="b-shop-items" class="shop-items-grid"></div>
+                    <button id="b-next-round-btn" class="nata-btn nata-btn-primary">NEXT ROUND</button>
+                </div>
+
+                <!-- Game Over Overlay -->
+                <div id="b-game-over" class="nata-overlay">
+                    <h1>Game Over</h1>
+                    <p>Round Reached: <span id="b-final-round">1</span></p>
+                    <button onclick="startBalatro()" class="nata-btn nata-btn-primary">TRY AGAIN</button>
+                    <button data-nav="menu-view" class="nata-btn nata-btn-secondary">MENU</button>
                 </div>
             </div>
         </section>
@@ -138,6 +211,12 @@
     <script src="js/game-match3-logic.js"></script>
     <script src="js/game-match3-render.js"></script>
     <script src="js/view-levelselect.js"></script>
+
+    <!-- Balatro Scripts -->
+    <script src="js/balatro-data.js"></script>
+    <script src="js/game-balatro-poker.js"></script>
+    <script src="js/game-balatro-core.js"></script>
+    <script src="js/game-balatro-view.js"></script>
 
     <script src="js/app.js"></script>
 </body>
