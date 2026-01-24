@@ -305,6 +305,13 @@
     /* No exit animation yet, they stay for scoring */
 }
 
+.poker-card.debuffed {
+    filter: grayscale(1) opacity(0.5);
+    background: #ccc;
+    cursor: not-allowed;
+    border: 2px dashed #666;
+}
+
 .poker-card.trigger-flash {
     animation: card-flash 0.3s ease-in-out;
 }

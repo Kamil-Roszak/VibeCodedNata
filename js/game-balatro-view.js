@@ -84,7 +84,18 @@ class BalatroView {
 
     render(state) {
         // Stats
-        this.elRound.innerText = state.round;
+        // Ante / Blind Info
+        if (state.blind) {
+            this.elRound.innerHTML = `<span style="font-size: 0.8em; color: #aaa;">Ante ${state.ante}</span><br>${state.blind.name}`;
+
+            // Show Boss Desc if applicable
+            if (state.blind.type === 'Boss') {
+                 // Might want to add a tooltip or separate element for blind desc
+            }
+        } else {
+            this.elRound.innerText = `Ante ${state.ante}`;
+        }
+
         this.elMoney.innerText = `$${state.money}`;
         this.elTarget.innerText = state.target;
         this.elScore.innerText = state.current;
@@ -141,11 +152,19 @@ class BalatroView {
             this.consumablesArea.innerHTML = '';
             // Always show 2 slots
             const consumables = state.consumables || [null, null];
-            consumables.forEach(item => {
+            consumables.forEach((item, index) => {
                 const el = document.createElement('div');
                 el.className = 'joker-card consumable-card'; // Reuse joker style for now
                 if (item) {
-                     el.innerHTML = `<div>${item.name}</div>`;
+                     el.innerHTML = `
+                        <div style="font-size: 10px;">${item.name}</div>
+                        <div class="use-btn">USE</div>
+                     `;
+                     el.title = item.desc;
+                     el.querySelector('.use-btn').addEventListener('click', (e) => {
+                         e.stopPropagation();
+                         this.game.useConsumable(index);
+                     });
                 } else {
                     el.classList.add('empty');
                     el.innerText = 'Consumable';
@@ -179,6 +198,11 @@ class BalatroView {
     createCardEl(card) {
         const el = document.createElement('div');
         el.className = `poker-card suit-${card.suit.toLowerCase()} ${card.selected ? 'selected' : ''}`;
+
+        if (card.debuffed) {
+            el.classList.add('debuffed');
+            el.title = "Debuffed: Chips/Mult disabled";
+        }
 
         const suitSymbol = {
             'Hearts': '♥', 'Diamonds': '♦', 'Spades': '♠', 'Clubs': '♣'
@@ -295,29 +319,56 @@ class BalatroView {
         this.shopMoney.innerText = `$${state.money}`;
         this.shopItems.innerHTML = '';
 
-        // Populate random jokers (from all definitions for now)
-        // In real game, random subset. Here just show all not owned.
-        const ownedIds = state.jokers.map(j => j.id);
-        const available = window.JOKER_DEFINITIONS.filter(j => !ownedIds.includes(j.id));
+        // Jokers Section
+        const jokerHeader = document.createElement('h3');
+        jokerHeader.innerText = "Jokers";
+        this.shopItems.appendChild(jokerHeader);
 
-        available.forEach(item => {
-            const el = document.createElement('div');
-            el.className = 'shop-item';
-            el.innerHTML = `
-                <img src="${item.asset}">
-                <h4>${item.name}</h4>
-                <p>${item.desc}</p>
-                <div class="price">$${item.cost}</div>
-            `;
-            el.addEventListener('click', () => {
-                if (this.game.buyJoker(item.id)) {
-                    // Update UI immediately handled by callback
-                    // Remove item from view manually or re-render?
-                    // Re-render handled by onUpdate
-                }
-            });
-            this.shopItems.appendChild(el);
+        const ownedIds = state.jokers.map(j => j.id);
+        const availableJokers = window.JOKER_DEFINITIONS.filter(j => !ownedIds.includes(j.id));
+
+        const jokerGrid = document.createElement('div');
+        jokerGrid.className = 'shop-items-grid';
+
+        availableJokers.forEach(item => {
+            const el = this.createShopItemEl(item, () => this.game.buyJoker(item.id));
+            jokerGrid.appendChild(el);
         });
+        this.shopItems.appendChild(jokerGrid);
+
+        // Consumables Section
+        const consHeader = document.createElement('h3');
+        consHeader.innerText = "Consumables";
+        this.shopItems.appendChild(consHeader);
+
+        const consGrid = document.createElement('div');
+        consGrid.className = 'shop-items-grid';
+
+        // Show random subset of Planets/Tarots? For now show all Planets
+        const availableCons = window.CONSUMABLE_DEFINITIONS.slice(0, 5); // Just first 5 for demo
+        availableCons.forEach(item => {
+             const el = this.createShopItemEl(item, () => this.game.buyConsumable(item.id));
+             consGrid.appendChild(el);
+        });
+        this.shopItems.appendChild(consGrid);
+    }
+
+    createShopItemEl(item, buyAction) {
+        const el = document.createElement('div');
+        el.className = 'shop-item';
+        // Handle image if exists
+        const imgHTML = item.asset ? `<img src="${item.asset}">` : `<div style="font-size: 30px; margin-bottom: 5px;">🪐</div>`;
+
+        el.innerHTML = `
+            ${imgHTML}
+            <h4>${item.name}</h4>
+            <p>${item.desc}</p>
+            <div class="price">$${item.cost}</div>
+        `;
+        el.addEventListener('click', () => {
+            buyAction();
+        });
+        return el;
     }
 }
 

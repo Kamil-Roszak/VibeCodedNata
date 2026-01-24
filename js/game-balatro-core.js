@@ -15,6 +15,8 @@
     const Deck = PokerLogic.Deck || window.Deck;
     const HandEvaluator = PokerLogic.HandEvaluator || window.HandEvaluator;
     const JOKER_DEFINITIONS = BalatroData.JOKER_DEFINITIONS || window.JOKER_DEFINITIONS;
+    const CONSUMABLE_DEFINITIONS = BalatroData.CONSUMABLE_DEFINITIONS || window.CONSUMABLE_DEFINITIONS;
+    const BLIND_DEFINITIONS = BalatroData.BLIND_DEFINITIONS || window.BLIND_DEFINITIONS;
 
     if (!Deck || !HandEvaluator || !JOKER_DEFINITIONS) {
         console.error("Balatro Core: Dependencies missing", {Deck, HandEvaluator, JOKER_DEFINITIONS});
@@ -46,6 +48,21 @@
 
             // 1. Card Scoring (Chips)
             for (const c of handStats.scoringCards) {
+                if (c.debuffed) {
+                    if (verbose) {
+                        breakdown.push({
+                            source: 'card',
+                            card: c,
+                            chips: 0,
+                            mult: 0,
+                            totalChips: chips,
+                            totalMult: mult,
+                            note: 'Debuffed'
+                        });
+                    }
+                    continue; // Skip scoring for debuffed card
+                }
+
                 const cardChips = c.value + (c.chipBonus || 0);
                 chips += cardChips;
 
@@ -145,8 +162,12 @@
             this.consumables = [null, null]; // Max 2 slots
             this.handLevels = {}; // Key: Hand Type, Value: Level (Int)
 
-            this.round = 1;
             this.money = 0;
+
+            // Ante / Blind System
+            this.ante = 1;
+            this.blindIndex = 0; // 0=Small, 1=Big, 2=Boss
+            this.currentBlind = null; // Object info
 
             // Round State
             this.targetScore = 300;
@@ -169,10 +190,56 @@
             types.forEach(t => this.handLevels[t] = 1);
         }
 
+        getBlindInfo() {
+            // Base score for Ante 1: 300
+            // Scaling is exponential-ish. Let's approximate Balatro:
+            // Ante 1: 300, 450, 600
+            // Ante 2: 800, 1200, 1600
+            // Logic: Base * (Scaling ^ Ante) * BlindMult
+
+            const base = 300 * Math.pow(2.5, this.ante - 1); // approximate
+
+            let blindType = 'Small';
+            let blindDef = BLIND_DEFINITIONS['Small'];
+
+            if (this.blindIndex === 1) {
+                blindType = 'Big';
+                blindDef = BLIND_DEFINITIONS['Big'];
+            } else if (this.blindIndex === 2) {
+                blindType = 'Boss';
+                // Select a boss deterministically or randomly (for now random from list)
+                // In real game, boss is known at start of Ante.
+                // Simplification: Pick random boss every time we hit index 2 or persist it?
+                // Let's persist if we had persistent Ante state, but for now just pick one.
+                const bosses = BLIND_DEFINITIONS['Boss'];
+                blindDef = bosses[this.ante % bosses.length]; // Deterministic-ish loop
+            }
+
+            return {
+                type: blindType,
+                name: blindDef.name,
+                desc: blindDef.desc || '',
+                target: Math.floor(base * blindDef.scoreMult),
+                reward: blindDef.reward,
+                id: blindDef.id
+            };
+        }
+
         startRound() {
             this.currentScore = 0;
             this.handsLeft = 4;
             this.discardsLeft = 4;
+
+            this.currentBlind = this.getBlindInfo();
+            this.targetScore = this.currentBlind.target;
+
+            // Apply Blind Debuffs (Boss)
+            if (this.currentBlind.id === 'boss_manacle') {
+                this.maxHandSize = 7;
+            } else {
+                this.maxHandSize = 8;
+            }
+
             this.deck.reset();
             this.drawHand();
             this.state = 'PLAYING';
@@ -183,12 +250,32 @@
             const needed = this.maxHandSize - this.hand.length;
             if (needed > 0) {
                 const newCards = this.deck.draw(needed);
+
+                // Check Debuffs (Boss Blind)
+                if (this.currentBlind && this.currentBlind.type === 'Boss') {
+                    newCards.forEach(c => {
+                        if (this.isCardDebuffed(c)) {
+                            c.debuffed = true;
+                        }
+                    });
+                }
+
                 this.hand.push(...newCards);
-                // Sort hand by rank for UX
-                // Or keep draw order? Balatro sorts.
-                // Let's sort by rank value
+                // Sort by rank value
                 this.hand.sort((a,b) => a.value - b.value);
             }
+        }
+
+        isCardDebuffed(card) {
+            if (!this.currentBlind) return false;
+            const id = this.currentBlind.id;
+
+            if (id === 'boss_goad' && card.suit === 'Spades') return true;
+            if (id === 'boss_club' && card.suit === 'Clubs') return true;
+            if (id === 'boss_window' && card.suit === 'Diamonds') return true;
+            if (id === 'boss_head' && card.suit === 'Hearts') return true;
+
+            return false;
         }
 
         selectCard(cardId) {
@@ -312,9 +399,19 @@
 
         endRound(win) {
             if (win) {
-                this.money += 5 + this.handsLeft; // Simple money logic
-                this.round++;
-                this.targetScore = Math.floor(this.targetScore * 1.5); // Scale up
+                // Money Logic
+                const interest = Math.min(5, Math.floor(this.money / 5));
+                const handsBonus = this.handsLeft;
+                const blindReward = this.currentBlind.reward;
+                this.money += blindReward + handsBonus + interest;
+
+                // Progress Ante/Blind
+                this.blindIndex++;
+                if (this.blindIndex > 2) {
+                    this.blindIndex = 0;
+                    this.ante++;
+                }
+
                 this.state = 'SHOP';
                 if (this.callbacks.onRoundEnd) this.callbacks.onRoundEnd(true);
             } else {
@@ -337,6 +434,71 @@
             return false;
         }
 
+        buyConsumable(id) {
+            if (this.state !== 'SHOP') return;
+            const item = CONSUMABLE_DEFINITIONS.find(c => c.id === id);
+            if (item && this.money >= item.cost) {
+                // Find empty slot
+                const slotIndex = this.consumables.findIndex(s => s === null);
+                if (slotIndex !== -1) {
+                    this.consumables[slotIndex] = { ...item };
+                    this.money -= item.cost;
+                    this.emitUpdate();
+                    return true;
+                }
+            }
+            return false;
+        }
+
+        useConsumable(index) {
+            const item = this.consumables[index];
+            if (!item) return;
+
+            // Effect Logic
+            if (item.type === 'planet') {
+                if (this.handLevels[item.target]) {
+                    this.handLevels[item.target]++;
+                    this.consumables[index] = null;
+                    this.emitUpdate();
+                }
+            } else if (item.type === 'tarot') {
+                const selected = this.getSelectedCards();
+                let used = false;
+
+                if (item.id === 'tarot_strength') {
+                    // Increase rank of up to 2 cards
+                    if (selected.length > 0 && selected.length <= 2) {
+                        selected.forEach(c => {
+                            // Simple rank up logic (2->3... K->A)
+                            // Ideally needs a rank map lookup to next rank
+                            c.value += 1; // Simplified: just buff value for now or logic needed
+                            // Proper logic would be changing c.rank string
+                        });
+                        used = true;
+                    }
+                } else if (item.id === 'tarot_empress') {
+                     // Enhance 2 cards to Mult Cards
+                     if (selected.length > 0 && selected.length <= 2) {
+                         selected.forEach(c => c.multBonus = (c.multBonus || 0) + 4);
+                         used = true;
+                     }
+                } else if (item.id === 'tarot_magician') {
+                    // Lucky Card: Chance for $20 or +20 Mult
+                    if (selected.length > 0 && selected.length <= 2) {
+                        selected.forEach(c => c.chipBonus = (c.chipBonus || 0) + 20); // Simplified to Bonus Chips
+                        used = true;
+                    }
+                }
+
+                if (used) {
+                    this.consumables[index] = null;
+                    // Deselect
+                    this.hand.forEach(c => c.selected = false);
+                    this.emitUpdate();
+                }
+            }
+        }
+
         nextRound() {
             if (this.state === 'SHOP') {
                 this.startRound();
@@ -347,7 +509,8 @@
             if (this.callbacks.onUpdate) {
                 this.callbacks.onUpdate({
                     hand: this.hand,
-                    round: this.round,
+                    ante: this.ante,
+                    blind: this.currentBlind,
                     money: this.money,
                     target: this.targetScore,
                     current: this.currentScore,
