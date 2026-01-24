@@ -95,6 +95,9 @@
             this.deck = new Deck();
             this.hand = [];
             this.jokerManager = new JokerManager();
+            this.consumables = [null, null]; // Max 2 slots
+            this.handLevels = {}; // Key: Hand Type, Value: Level (Int)
+
             this.round = 1;
             this.money = 0;
 
@@ -107,6 +110,16 @@
 
             this.state = 'PLAYING'; // PLAYING, SHOP, GAME_OVER
             this.callbacks = config?.callbacks || {};
+
+            this.initHandLevels();
+        }
+
+        initHandLevels() {
+            const types = [
+                'High Card', 'Pair', 'Two Pair', 'Three of a Kind', 'Straight',
+                'Flush', 'Full House', 'Four of a Kind', 'Straight Flush', 'Royal Flush'
+            ];
+            types.forEach(t => this.handLevels[t] = 1);
         }
 
         startRound() {
@@ -152,17 +165,57 @@
             this.emitUpdate();
         }
 
+        getHandLevelStats(type) {
+            const level = this.handLevels[type] || 1;
+            // Simple scaling: +10 Chips, +1 Mult per level above 1
+            const bonusChips = (level - 1) * 10;
+            const bonusMult = (level - 1) * 1;
+            return { level, bonusChips, bonusMult };
+        }
+
+        evaluateSelectedHand() {
+            const selected = this.getSelectedCards();
+            if (selected.length === 0) return null;
+
+            const stats = HandEvaluator.evaluate(selected);
+
+            // Apply Levels
+            const levelInfo = this.getHandLevelStats(stats.type);
+            stats.baseChips += levelInfo.bonusChips;
+            stats.baseMult += levelInfo.bonusMult;
+            stats.level = levelInfo.level;
+
+            // Calculate Score (Jokers etc)
+            const scoreResult = this.jokerManager.calculateScore(stats);
+
+            return {
+                handType: stats.type,
+                level: stats.level,
+                chips: scoreResult.chips,
+                mult: scoreResult.mult,
+                total: scoreResult.total,
+                scoringCards: stats.scoringCards
+            };
+        }
+
         playHand() {
             if (this.handsLeft <= 0 || this.state !== 'PLAYING') return;
 
             const selected = this.getSelectedCards();
             if (selected.length === 0 || selected.length > 5) return; // Invalid
 
+            // Evaluate first to capture stats
+            const stats = HandEvaluator.evaluate(selected);
+
+            // Apply Levels
+            const levelInfo = this.getHandLevelStats(stats.type);
+            stats.baseChips += levelInfo.bonusChips;
+            stats.baseMult += levelInfo.bonusMult;
+            stats.level = levelInfo.level;
+
             // Remove from hand
             this.hand = this.hand.filter(c => !c.selected);
 
-            // Evaluate
-            const stats = HandEvaluator.evaluate(selected);
             const scoreResult = this.jokerManager.calculateScore(stats);
 
             this.currentScore += scoreResult.total;
@@ -245,6 +298,7 @@
                     handsLeft: this.handsLeft,
                     discardsLeft: this.discardsLeft,
                     jokers: this.jokerManager.jokers,
+                    consumables: this.consumables,
                     state: this.state
                 });
             }

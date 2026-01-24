@@ -9,7 +9,15 @@ class BalatroView {
         this.handArea = document.getElementById('b-hand-area');
         this.playArea = document.getElementById('b-play-slots');
         this.jokersArea = document.getElementById('b-jokers-area');
+        this.consumablesArea = document.getElementById('b-consumables-area');
         this.deckArea = document.getElementById('b-deck-area');
+
+        // Preview Elements
+        this.elPreviewBox = document.getElementById('b-hand-preview');
+        this.elPreviewName = document.getElementById('b-preview-name');
+        this.elPreviewLevel = document.getElementById('b-preview-level');
+        this.elPreviewChips = document.getElementById('b-preview-chips');
+        this.elPreviewMult = document.getElementById('b-preview-mult');
 
         this.elChips = document.getElementById('b-chips');
         this.elMult = document.getElementById('b-mult');
@@ -110,17 +118,57 @@ class BalatroView {
 
         // Render Jokers
         this.jokersArea.innerHTML = '';
-        state.jokers.forEach(joker => {
+        // Always show 5 slots
+        for(let i=0; i<5; i++) {
+            const joker = state.jokers[i];
             const el = document.createElement('div');
             el.className = 'joker-card';
-            el.innerHTML = `
-                <img src="${joker.asset}">
-                <div>${joker.name}</div>
-            `;
-            // Simple tooltip?
-            el.title = joker.desc;
+            if (joker) {
+                el.innerHTML = `
+                    <img src="${joker.asset}">
+                    <div>${joker.name}</div>
+                `;
+                el.title = joker.desc;
+            } else {
+                el.classList.add('empty');
+                el.innerText = 'Joker';
+            }
             this.jokersArea.appendChild(el);
-        });
+        }
+
+        // Render Consumables
+        if (this.consumablesArea) {
+            this.consumablesArea.innerHTML = '';
+            // Always show 2 slots
+            const consumables = state.consumables || [null, null];
+            consumables.forEach(item => {
+                const el = document.createElement('div');
+                el.className = 'joker-card consumable-card'; // Reuse joker style for now
+                if (item) {
+                     el.innerHTML = `<div>${item.name}</div>`;
+                } else {
+                    el.classList.add('empty');
+                    el.innerText = 'Consumable';
+                }
+                this.consumablesArea.appendChild(el);
+            });
+        }
+
+        // Hand Preview
+        if (state.state === 'PLAYING') {
+            const preview = this.game.evaluateSelectedHand();
+            if (preview) {
+                this.elPreviewBox.classList.remove('hidden');
+                this.elPreviewName.innerText = preview.handType;
+                this.elPreviewLevel.innerText = `lvl.${preview.level}`;
+                this.elPreviewChips.innerText = preview.chips;
+                this.elPreviewMult.innerText = preview.mult;
+            } else {
+                this.elPreviewBox.classList.add('hidden');
+            }
+        } else {
+            this.elPreviewBox.classList.add('hidden');
+        }
 
         // Check Shop
         if (state.state === 'SHOP') {

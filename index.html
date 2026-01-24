@@ -43,6 +43,9 @@
                     <div id="b-jokers-area" class="joker-slots">
                         <!-- Filled by JS -->
                     </div>
+                    <div id="b-consumables-area" class="consumable-slots">
+                        <!-- Consumables -->
+                    </div>
                     <div class="round-info">
                         <div class="info-box">
                             <span class="label">Round</span>
@@ -57,6 +60,16 @@
 
                 <!-- Middle: Score -->
                 <div class="balatro-score-area">
+                    <div id="b-hand-preview" class="hand-preview-box hidden">
+                        <div class="hand-name" id="b-preview-name">High Card</div>
+                        <div class="hand-level" id="b-preview-level">lvl.1</div>
+                        <div class="hand-score">
+                            <span id="b-preview-chips" class="score-chips">10</span>
+                            <span class="x">X</span>
+                            <span id="b-preview-mult" class="score-mult">1</span>
+                        </div>
+                    </div>
+
                     <div class="score-display">
                         <div class="score-row">
                             <span id="b-chips" class="score-chips">0</span>
