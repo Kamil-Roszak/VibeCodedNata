@@ -19,7 +19,11 @@ class UserManager {
         return {
             points: 0,
             badges: [],
-            highScores: {}
+            highScores: {},
+            match3: {
+                maxLevel: 1,
+                stars: {} // { 1: 3, 2: 1 }
+            }
         };
     }
 
@@ -53,6 +57,32 @@ class UserManager {
         return this.data.points;
     }
 
+    getMatch3Level() {
+        return this.data.match3?.maxLevel || 1;
+    }
+
+    getMatch3Stars(level) {
+        return this.data.match3?.stars?.[level] || 0;
+    }
+
+    completeMatch3Level(level, stars, score) {
+        if (!this.data.match3) this.data.match3 = { maxLevel: 1, stars: {} };
+
+        // Update stars if better
+        const currentStars = this.data.match3.stars[level] || 0;
+        if (stars > currentStars) {
+            this.data.match3.stars[level] = stars;
+        }
+
+        // Unlock next level
+        if (level === this.data.match3.maxLevel) {
+            this.data.match3.maxLevel++;
+        }
+
+        this.addPoints(score); // Add score to global points
+        this.save();
+    }
+
     updateHeaderUI() {
         const el = document.getElementById('user-points-display');
         if (el) el.innerText = `${this.data.points} pts`;
@@ -79,6 +109,92 @@ document.addEventListener('DOMContentLoaded', () => {
             const target = e.target.closest('[data-nav]').dataset.nav;
             navigateTo(target);
         });
+    });
+
+    // Match 3 Integration
+    let match3Instance = null;
+    window.match3Instance = null; // Expose
+    const levelGen = new LevelGenerator();
+
+    window.startMatch3 = (level) => {
+        const config = levelGen.getConfig(level);
+
+        // Update Start Overlay
+        document.getElementById('m3-level-num').innerText = level;
+        document.getElementById('m3-start-target').innerText = config.targetScore;
+
+        document.getElementById('match3-start').classList.remove('hidden');
+        document.getElementById('match3-end').classList.add('hidden');
+        document.getElementById('match3-hud').classList.add('hidden'); // Hide until start
+
+        navigateTo('match3-view');
+
+        // Clean up old
+        if (match3Instance) {
+            match3Instance.stop();
+            match3Instance = null;
+        }
+
+        const startBtn = document.getElementById('m3-play-btn');
+        // Remove old listeners to avoid duplicates (naive approach: clone)
+        const newBtn = startBtn.cloneNode(true);
+        startBtn.parentNode.replaceChild(newBtn, startBtn);
+
+        newBtn.addEventListener('click', () => {
+            document.getElementById('match3-start').classList.add('hidden');
+            document.getElementById('match3-hud').classList.remove('hidden');
+
+            match3Instance = new Match3Game({
+                canvasId: 'match3Canvas',
+                levelConfig: config,
+                callbacks: {
+                    onUpdate: (data) => {
+                        document.getElementById('m3-moves').innerText = data.moves;
+                        document.getElementById('m3-score').innerText = data.score;
+                        document.getElementById('m3-target').innerText = data.target;
+                    },
+                    onGameOver: (result) => {
+                        document.getElementById('match3-hud').classList.add('hidden');
+                        document.getElementById('match3-end').classList.remove('hidden');
+
+                        const title = document.getElementById('m3-end-title');
+                        const starsEl = document.getElementById('m3-stars');
+
+                        if (result.win) {
+                            title.innerText = "Level Complete!";
+                            let s = "";
+                            for(let i=0; i<result.stars; i++) s += "⭐";
+                            starsEl.innerText = s;
+
+                            userManager.completeMatch3Level(level, result.stars, result.score);
+
+                            // Setup Next Button
+                            const nextBtn = document.getElementById('m3-next-btn');
+                            nextBtn.innerText = "CONTINUE";
+                            nextBtn.onclick = () => {
+                                navigateTo('level-select-view');
+                            };
+                        } else {
+                            title.innerText = "Out of Moves!";
+                            starsEl.innerText = "";
+                            const nextBtn = document.getElementById('m3-next-btn');
+                            nextBtn.innerText = "TRY AGAIN";
+                            nextBtn.onclick = () => {
+                                window.startMatch3(level);
+                            };
+                        }
+                        document.getElementById('m3-end-score').innerText = result.score;
+                    }
+                }
+            });
+            window.match3Instance = match3Instance;
+        });
+    };
+
+    // Exit Match 3
+    document.getElementById('exitMatch3Btn').addEventListener('click', () => {
+        if (match3Instance) match3Instance.stop();
+        navigateTo('level-select-view');
     });
 
     // Game Integration
@@ -166,6 +282,11 @@ function navigateTo(viewId) {
     if (target) {
         target.classList.remove('hidden-view');
         target.classList.add('active-view');
+    }
+
+    // Special handlers
+    if (viewId === 'level-select-view' && window.levelSelectView) {
+        window.levelSelectView.render();
     }
 }
 
