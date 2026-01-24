@@ -123,6 +123,23 @@
                     <button onclick="startBalatro()" class="nata-btn nata-btn-primary">TRY AGAIN</button>
                     <button data-nav="menu-view" class="nata-btn nata-btn-secondary">MENU</button>
                 </div>
+
+                <!-- Blind Select Overlay -->
+                <div id="b-blind-select" class="nata-overlay">
+                    <h1>Select Blind</h1>
+                    <div class="blind-info-card">
+                        <h2 id="b-blind-name">Small Blind</h2>
+                        <p id="b-blind-desc">Score at least 300 chips</p>
+                        <div class="blind-reward">Reward: $<span id="b-blind-reward">3</span></div>
+                    </div>
+                    <div class="blind-actions">
+                        <button id="b-select-play" class="nata-btn nata-btn-primary">SELECT</button>
+                        <div class="skip-option">
+                            <button id="b-select-skip" class="nata-btn nata-btn-secondary">SKIP</button>
+                            <div class="tag-reward">Tag: <span id="b-tag-name">Free Shop</span></div>
+                        </div>
+                    </div>
+                </div>
             </div>
         </section>
 

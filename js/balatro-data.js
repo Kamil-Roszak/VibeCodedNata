@@ -105,13 +105,22 @@
         ]
     };
 
+    const VOUCHER_DEFINITIONS = [
+        { id: 'v_paint', name: 'Paint Brush', desc: '+1 Hand Size', cost: 10 },
+        { id: 'v_grabber', name: 'Grabber', desc: '+1 Hand per round', cost: 10 },
+        { id: 'v_waste', name: 'Wasteful', desc: '+1 Discard per round', cost: 10 },
+        { id: 'v_seed', name: 'Seed Money', desc: 'Raise interest cap to $10', cost: 10 },
+        { id: 'v_blank', name: 'Blank', desc: 'Does nothing?', cost: 10 }
+    ];
+
     // Export
     if (typeof module !== 'undefined' && module.exports) {
-        module.exports = { POKER_HANDS, JOKER_DEFINITIONS, CONSUMABLE_DEFINITIONS, BLIND_DEFINITIONS };
+        module.exports = { POKER_HANDS, JOKER_DEFINITIONS, CONSUMABLE_DEFINITIONS, BLIND_DEFINITIONS, VOUCHER_DEFINITIONS };
     } else {
         window.POKER_HANDS = POKER_HANDS;
         window.JOKER_DEFINITIONS = JOKER_DEFINITIONS;
         window.CONSUMABLE_DEFINITIONS = CONSUMABLE_DEFINITIONS;
         window.BLIND_DEFINITIONS = BLIND_DEFINITIONS;
+        window.VOUCHER_DEFINITIONS = VOUCHER_DEFINITIONS;
     }
 })();

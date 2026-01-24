@@ -42,6 +42,16 @@ class BalatroView {
         this.shopItems = document.getElementById('b-shop-items');
         this.btnNextRound = document.getElementById('b-next-round-btn');
 
+        // Blind Select
+        this.blindSelectOverlay = document.getElementById('b-blind-select');
+        this.elBlindName = document.getElementById('b-blind-name');
+        this.elBlindDesc = document.getElementById('b-blind-desc');
+        this.elBlindReward = document.getElementById('b-blind-reward');
+        this.elTagName = document.getElementById('b-tag-name');
+
+        this.btnSelectPlay = document.getElementById('b-select-play');
+        this.btnSelectSkip = document.getElementById('b-select-skip');
+
         // Overlays
         this.gameOverOverlay = document.getElementById('b-game-over');
         this.finalRound = document.getElementById('b-final-round');
@@ -59,6 +69,16 @@ class BalatroView {
         this.btnNextRound.addEventListener('click', () => {
             this.game?.nextRound();
             this.shopOverlay.classList.remove('visible');
+        });
+
+        this.btnSelectPlay.addEventListener('click', () => {
+            this.game?.startRound();
+            this.blindSelectOverlay.classList.remove('visible');
+        });
+
+        this.btnSelectSkip.addEventListener('click', () => {
+            this.game?.skipBlind();
+            this.blindSelectOverlay.classList.remove('visible');
         });
     }
 
@@ -192,6 +212,19 @@ class BalatroView {
         // Check Shop
         if (state.state === 'SHOP') {
             this.showShop(state);
+        } else {
+            this.shopOverlay.classList.remove('visible');
+        }
+
+        // Check Blind Select
+        if (state.state === 'BLIND_SELECT' && state.blind) {
+             this.blindSelectOverlay.classList.add('visible');
+             this.elBlindName.innerText = state.blind.name;
+             this.elBlindDesc.innerText = `Target: ${state.blind.target} | ${state.blind.desc}`;
+             this.elBlindReward.innerText = state.blind.reward;
+             this.elTagName.innerText = state.nextTag ? state.nextTag.name : 'Unknown';
+        } else {
+             this.blindSelectOverlay.classList.remove('visible');
         }
     }
 
@@ -202,6 +235,13 @@ class BalatroView {
         if (card.debuffed) {
             el.classList.add('debuffed');
             el.title = "Debuffed: Chips/Mult disabled";
+        }
+
+        if (card.multBonus && card.multBonus > 0) {
+            el.classList.add('enhanced-mult');
+        }
+        if (card.chipBonus && card.chipBonus > 0) {
+            el.classList.add('enhanced-bonus');
         }
 
         const suitSymbol = {
@@ -351,6 +391,27 @@ class BalatroView {
              consGrid.appendChild(el);
         });
         this.shopItems.appendChild(consGrid);
+
+        // Vouchers Section
+        const voucherHeader = document.createElement('h3');
+        voucherHeader.innerText = "Vouchers";
+        this.shopItems.appendChild(voucherHeader);
+
+        const voucherGrid = document.createElement('div');
+        voucherGrid.className = 'shop-items-grid';
+
+        // Pick one random voucher not owned
+        const availableVouchers = window.VOUCHER_DEFINITIONS.filter(v => !state.vouchers.includes(v.id));
+        if (availableVouchers.length > 0) {
+            // Just show first one for now or random
+            const item = availableVouchers[0];
+            const el = this.createShopItemEl(item, () => this.game.buyVoucher(item.id));
+            el.classList.add('voucher-item');
+            voucherGrid.appendChild(el);
+        } else {
+             voucherGrid.innerHTML = "<div>Sold Out</div>";
+        }
+        this.shopItems.appendChild(voucherGrid);
     }
 
     createShopItemEl(item, buyAction) {

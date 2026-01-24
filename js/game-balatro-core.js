@@ -17,6 +17,7 @@
     const JOKER_DEFINITIONS = BalatroData.JOKER_DEFINITIONS || window.JOKER_DEFINITIONS;
     const CONSUMABLE_DEFINITIONS = BalatroData.CONSUMABLE_DEFINITIONS || window.CONSUMABLE_DEFINITIONS;
     const BLIND_DEFINITIONS = BalatroData.BLIND_DEFINITIONS || window.BLIND_DEFINITIONS;
+    const VOUCHER_DEFINITIONS = BalatroData.VOUCHER_DEFINITIONS || window.VOUCHER_DEFINITIONS;
 
     if (!Deck || !HandEvaluator || !JOKER_DEFINITIONS) {
         console.error("Balatro Core: Dependencies missing", {Deck, HandEvaluator, JOKER_DEFINITIONS});
@@ -161,6 +162,7 @@
             this.jokerManager = new JokerManager();
             this.consumables = [null, null]; // Max 2 slots
             this.handLevels = {}; // Key: Hand Type, Value: Level (Int)
+            this.vouchers = []; // Passive upgrades
 
             this.money = 0;
 
@@ -168,6 +170,10 @@
             this.ante = 1;
             this.blindIndex = 0; // 0=Small, 1=Big, 2=Boss
             this.currentBlind = null; // Object info
+
+            // Tags
+            this.nextTag = null; // Generated when entering Blind Select
+            this.tags = []; // Accumulated Tags
 
             // Round State
             this.targetScore = 300;
@@ -225,19 +231,69 @@
             };
         }
 
+        prepareBlindSelect() {
+            this.state = 'BLIND_SELECT';
+            this.currentBlind = this.getBlindInfo();
+
+            // Generate Random Tag for Skip
+            const TAGS = [
+                { id: 'tag_handy', name: 'Handy Tag', desc: 'Level up played hand next round' },
+                { id: 'tag_economy', name: 'Economy Tag', desc: 'Give $15' },
+                { id: 'tag_charm', name: 'Charm Tag', desc: 'Free Shop' },
+                { id: 'tag_d6', name: 'D6 Tag', desc: 'Reroll next Shop for $0' }
+            ];
+            this.nextTag = TAGS[Math.floor(Math.random() * TAGS.length)];
+
+            this.emitUpdate();
+        }
+
+        skipBlind() {
+            if (this.state !== 'BLIND_SELECT') return;
+
+            // Apply Tag Effect
+            if (this.nextTag.id === 'tag_economy') {
+                this.money += 15;
+            } else {
+                this.tags.push(this.nextTag);
+            }
+
+            // Skip directly to Shop
+            this.state = 'SHOP';
+            this.emitUpdate();
+        }
+
         startRound() {
+            if (this.state !== 'BLIND_SELECT') return;
+
             this.currentScore = 0;
             this.handsLeft = 4;
             this.discardsLeft = 4;
 
-            this.currentBlind = this.getBlindInfo();
+            // Apply Vouchers (Base Stats)
+            if (this.hasVoucher('v_grabber')) this.handsLeft++;
+            if (this.hasVoucher('v_waste')) this.discardsLeft++;
+
             this.targetScore = this.currentBlind.target;
 
-            // Apply Blind Debuffs (Boss)
+            // Apply Blind Debuffs (Boss) vs Vouchers
+            let baseHandSize = 8;
+            if (this.hasVoucher('v_paint')) baseHandSize++;
+
             if (this.currentBlind.id === 'boss_manacle') {
-                this.maxHandSize = 7;
+                this.maxHandSize = baseHandSize - 1;
             } else {
-                this.maxHandSize = 8;
+                this.maxHandSize = baseHandSize;
+            }
+
+            // Apply Tags (Start of Round)
+            // e.g. "Handy Tag" - handled in playHand or endRound usually?
+            // For simplicity, let's say "Handy Tag" gives a free Level Up consumable immediately
+            const handyIndex = this.tags.findIndex(t => t.id === 'tag_handy');
+            if (handyIndex !== -1) {
+                // Add a random planet consumable if space?
+                // Or just level up High Card for now.
+                this.handLevels['High Card']++;
+                this.tags.splice(handyIndex, 1);
             }
 
             this.deck.reset();
@@ -400,7 +456,10 @@
         endRound(win) {
             if (win) {
                 // Money Logic
-                const interest = Math.min(5, Math.floor(this.money / 5));
+                let interestCap = 5;
+                if (this.hasVoucher('v_seed')) interestCap = 10;
+
+                const interest = Math.min(interestCap, Math.floor(this.money / 5));
                 const handsBonus = this.handsLeft;
                 const blindReward = this.currentBlind.reward;
                 this.money += blindReward + handsBonus + interest;
@@ -448,6 +507,25 @@
                 }
             }
             return false;
+        }
+
+        buyVoucher(id) {
+            if (this.state !== 'SHOP') return;
+            // Check if already owned
+            if (this.vouchers.includes(id)) return false;
+
+            const item = VOUCHER_DEFINITIONS.find(v => v.id === id);
+            if (item && this.money >= item.cost) {
+                this.vouchers.push(id);
+                this.money -= item.cost;
+                this.emitUpdate();
+                return true;
+            }
+            return false;
+        }
+
+        hasVoucher(id) {
+            return this.vouchers.includes(id);
         }
 
         useConsumable(index) {
@@ -501,7 +579,20 @@
 
         nextRound() {
             if (this.state === 'SHOP') {
-                this.startRound();
+                // Apply end of shop logic (e.g. reset tags like Charm/D6 if they were one-use?)
+                // Actually Charm is "Free Shop", used during shop generation/purchase.
+                // Clear shop tags
+                this.tags = this.tags.filter(t => t.id !== 'tag_charm' && t.id !== 'tag_d6');
+
+                // Advance Blind Index here?
+                // Wait, endRound advances blind index.
+                // So now we are ready for the NEXT blind.
+                this.prepareBlindSelect();
+            } else if (this.state === 'GAME_OVER') {
+                // Restart?
+            } else {
+                // Initial start
+                this.prepareBlindSelect();
             }
         }
 
@@ -511,6 +602,7 @@
                     hand: this.hand,
                     ante: this.ante,
                     blind: this.currentBlind,
+                    nextTag: this.nextTag,
                     money: this.money,
                     target: this.targetScore,
                     current: this.currentScore,
@@ -518,6 +610,7 @@
                     discardsLeft: this.discardsLeft,
                     jokers: this.jokerManager.jokers,
                     consumables: this.consumables,
+                    vouchers: this.vouchers,
                     state: this.state
                 });
             }

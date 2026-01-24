@@ -312,6 +312,39 @@
     border: 2px dashed #666;
 }
 
+/* Enhanced Cards */
+.poker-card.enhanced-mult {
+    box-shadow: 0 0 10px #ff5555;
+    border: 2px solid #ff5555;
+}
+.poker-card.enhanced-mult::after {
+    content: '+4 Mult';
+    position: absolute;
+    bottom: -15px;
+    left: 0;
+    width: 100%;
+    font-size: 10px;
+    background: #ff5555;
+    color: white;
+    border-radius: 4px;
+}
+
+.poker-card.enhanced-bonus {
+    box-shadow: 0 0 10px #55aaff;
+    border: 2px solid #55aaff;
+}
+.poker-card.enhanced-bonus::after {
+    content: '+20 Chips';
+    position: absolute;
+    bottom: -15px;
+    left: 0;
+    width: 100%;
+    font-size: 10px;
+    background: #55aaff;
+    color: white;
+    border-radius: 4px;
+}
+
 .poker-card.trigger-flash {
     animation: card-flash 0.3s ease-in-out;
 }
@@ -372,6 +405,11 @@
 .shop-item:hover {
     border-color: var(--nata-blue);
     transform: scale(1.05);
+}
+
+.shop-item.voucher-item {
+    background: #eef;
+    border-color: #aa88ff;
 }
 
 .shop-item img {
