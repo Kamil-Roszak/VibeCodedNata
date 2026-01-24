@@ -14,6 +14,7 @@
     background: rgba(0, 50, 0, 0.3);
     border-radius: 20px;
     margin-top: 50px; /* Header space */
+    overflow: hidden; /* Prevent overflow */
 }
 
 /* Top: Jokers */
@@ -21,6 +22,7 @@
     display: flex;
     justify-content: space-between;
     height: 120px;
+    flex-shrink: 0; /* Don't shrink top bar too much */
 }
 
 .joker-slots {
@@ -32,6 +34,7 @@
     flex-grow: 1;
     margin-right: 20px;
     align-items: center;
+    overflow-x: auto; /* Scroll if too many jokers */
 }
 
 .joker-card {
@@ -48,6 +51,7 @@
     padding: 5px;
     text-align: center;
     font-size: 10px;
+    flex-shrink: 0;
 }
 
 .joker-card img {
@@ -62,6 +66,7 @@
     flex-direction: column;
     gap: 10px;
     width: 150px;
+    flex-shrink: 0;
 }
 
 .info-box {
@@ -81,7 +86,8 @@
     flex-direction: column;
     align-items: center;
     justify-content: center;
-    flex-grow: 1;
+    flex-grow: 1; /* Take remaining space */
+    min-height: 100px; /* Ensure visibility */
 }
 
 .score-display {
@@ -128,6 +134,8 @@
     gap: 20px;
     align-items: center;
     position: relative;
+    flex-shrink: 0; /* Keep play area size stable */
+    padding-bottom: 20px;
 }
 
 .action-row {
@@ -152,6 +160,7 @@
     font-weight: bold;
     cursor: help;
     margin-left: 20px;
+    flex-shrink: 0;
 }
 
 .card-row {
@@ -160,6 +169,7 @@
     justify-content: center;
     min-height: 140px;
     perspective: 1000px;
+    width: 100%;
 }
 
 .play-slots {
@@ -183,6 +193,7 @@
     user-select: none;
     position: relative;
     border: 1px solid #ddd;
+    flex-shrink: 0;
 }
 
 .poker-card:hover {
@@ -254,4 +265,125 @@
 .control-panel {
     display: flex;
     gap: 10px;
+}
+
+/* Mobile Responsive */
+@media (max-width: 768px) {
+    .balatro-container {
+        padding: 5px;
+        margin-top: 50px;
+        overflow-y: auto; /* Allow vertical scroll if needed */
+        display: block; /* Stack blocks instead of flex column forcing fit */
+    }
+
+    /* Top Bar Scaling */
+    .balatro-top-bar {
+        height: auto;
+        flex-wrap: wrap;
+        margin-bottom: 10px;
+    }
+
+    .joker-slots {
+        margin-right: 0;
+        width: 100%;
+        margin-bottom: 5px;
+        padding: 5px;
+    }
+
+    .joker-card {
+        width: 50px;
+        height: 70px;
+        font-size: 8px;
+    }
+
+    .joker-card img {
+        width: 25px;
+        height: 40px;
+    }
+
+    .round-info {
+        width: 100%;
+        flex-direction: row;
+        justify-content: space-between;
+    }
+
+    .info-box {
+        padding: 5px 10px;
+        font-size: 12px;
+        flex-grow: 1;
+        margin: 0 2px;
+    }
+
+    /* Score Scaling */
+    .score-display {
+        padding: 10px;
+        margin-bottom: 10px;
+    }
+
+    .score-row { font-size: 20px; }
+    .score-total { font-size: 32px; }
+    .target-display { font-size: 16px; }
+
+    /* Play Area Scaling */
+    .balatro-play-area {
+        gap: 10px;
+    }
+
+    .play-slots {
+        height: 100px;
+        min-height: 100px;
+    }
+
+    .card-row {
+        gap: 0; /* Overlap handled by margin */
+        min-height: 100px;
+        flex-wrap: nowrap;
+        overflow-x: visible; /* Let them stick out if needed, usually overlap handles it */
+    }
+
+    .poker-card {
+        width: 60px;
+        height: 90px;
+        font-size: 16px;
+        margin-right: -15px; /* Negative margin for overlap */
+    }
+
+    .poker-card:last-child {
+        margin-right: 0;
+    }
+
+    .card-center {
+        font-size: 24px;
+    }
+
+    /* Deck Pile */
+    .deck-pile {
+        width: 50px;
+        height: 80px;
+        font-size: 10px;
+        margin-left: 5px;
+    }
+
+    /* Action Buttons */
+    .action-row {
+        flex-wrap: wrap;
+        justify-content: center;
+        gap: 5px;
+    }
+
+    .action-buttons button {
+        padding: 8px 15px;
+        font-size: 12px;
+    }
+
+    .control-panel button {
+        padding: 5px 10px;
+        font-size: 10px;
+    }
+
+    /* Hand Area specific */
+    .hand-area {
+        padding-bottom: 50px; /* Space for scroll */
+        margin-top: 10px;
+    }
 }
