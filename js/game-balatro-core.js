@@ -14,6 +14,8 @@
     // Ensure dependencies exist
     const Deck = PokerLogic.Deck || window.Deck;
     const HandEvaluator = PokerLogic.HandEvaluator || window.HandEvaluator;
+    const RANKS = PokerLogic.RANKS || window.RANKS;
+    const RANK_VALUES = PokerLogic.RANK_VALUES || window.RANK_VALUES;
     const JOKER_DEFINITIONS = BalatroData.JOKER_DEFINITIONS || window.JOKER_DEFINITIONS;
     const CONSUMABLE_DEFINITIONS = BalatroData.CONSUMABLE_DEFINITIONS || window.CONSUMABLE_DEFINITIONS;
     const BLIND_DEFINITIONS = BalatroData.BLIND_DEFINITIONS || window.BLIND_DEFINITIONS;
@@ -174,6 +176,7 @@
             // Tags
             this.nextTag = null; // Generated when entering Blind Select
             this.tags = []; // Accumulated Tags
+            this.lastUsedConsumable = null;
 
             // Round State
             this.targetScore = 300;
@@ -185,7 +188,78 @@
             this.state = 'PLAYING'; // PLAYING, SHOP, GAME_OVER
             this.callbacks = config?.callbacks || {};
 
+            // Shop State
+            this.shop = {
+                jokers: [],
+                consumables: [],
+                vouchers: []
+            };
+
             this.initHandLevels();
+        }
+
+        generateShop() {
+            // Check for Charm Tag (Free Shop)
+            const charmTagIndex = this.tags.findIndex(t => t.id === 'tag_charm');
+            const isFree = charmTagIndex !== -1;
+
+            // 1. Generate 2 Random Jokers
+            this.shop.jokers = [];
+            const ownedIds = this.jokerManager.jokers.map(j => j.id);
+            const availableJokers = JOKER_DEFINITIONS.filter(j => !ownedIds.includes(j.id));
+
+            // Shuffle available
+            for (let i = availableJokers.length - 1; i > 0; i--) {
+                const j = Math.floor(Math.random() * (i + 1));
+                [availableJokers[i], availableJokers[j]] = [availableJokers[j], availableJokers[i]];
+            }
+
+            const selectedJokers = availableJokers.slice(0, 2);
+            this.shop.jokers = selectedJokers.map(j => ({ ...j, cost: isFree ? 0 : j.cost }));
+
+            // 2. Generate 2 Random Consumables
+            this.shop.consumables = [];
+            const availableCons = [...CONSUMABLE_DEFINITIONS];
+             for (let i = availableCons.length - 1; i > 0; i--) {
+                const j = Math.floor(Math.random() * (i + 1));
+                [availableCons[i], availableCons[j]] = [availableCons[j], availableCons[i]];
+            }
+            const selectedCons = availableCons.slice(0, 2);
+            this.shop.consumables = selectedCons.map(c => ({ ...c, cost: isFree ? 0 : c.cost }));
+
+            // 3. Generate 1 Voucher (if available and not already generated)
+            // Note: Balatro vouchers are usually one per shop/ante, persist unless bought.
+            // For now, generate new one each reroll/shop visit if not empty.
+            this.shop.vouchers = [];
+            const availableVouchers = VOUCHER_DEFINITIONS.filter(v => !this.vouchers.includes(v.id));
+            if (availableVouchers.length > 0) {
+                 const v = availableVouchers[Math.floor(Math.random() * availableVouchers.length)];
+                 this.shop.vouchers.push({ ...v, cost: isFree ? 0 : v.cost });
+            }
+
+            // Consume Charm Tag if used? usually applied to the shop generation
+            if (isFree) {
+                this.tags.splice(charmTagIndex, 1);
+            }
+
+            this.emitUpdate();
+        }
+
+        rerollShop() {
+            if (this.state !== 'SHOP') return;
+
+            let cost = 5;
+            // Check D6 Tag
+            const d6Index = this.tags.findIndex(t => t.id === 'tag_d6');
+            if (d6Index !== -1) {
+                cost = 0;
+                this.tags.splice(d6Index, 1);
+            }
+
+            if (this.money >= cost) {
+                this.money -= cost;
+                this.generateShop();
+            }
         }
 
         initHandLevels() {
@@ -259,7 +333,7 @@
 
             // Skip directly to Shop
             this.state = 'SHOP';
-            this.emitUpdate();
+            this.generateShop();
         }
 
         startRound() {
@@ -408,6 +482,16 @@
             // Remove from hand
             this.hand = this.hand.filter(c => !c.selected);
 
+            // The Hook: Discard 2 random cards
+            if (this.currentBlind && this.currentBlind.id === 'boss_hook') {
+                 for(let i=0; i<2; i++) {
+                     if (this.hand.length > 0) {
+                         const idx = Math.floor(Math.random() * this.hand.length);
+                         this.hand.splice(idx, 1);
+                     }
+                 }
+            }
+
             // Calculate Score with breakdown for animation
             const scoreResult = this.jokerManager.calculateScore(stats, true);
 
@@ -473,6 +557,7 @@
                 }
 
                 this.state = 'SHOP';
+                this.generateShop();
                 if (this.callbacks.onRoundEnd) this.callbacks.onRoundEnd(true);
             } else {
                 this.state = 'GAME_OVER';
@@ -483,10 +568,17 @@
 
         buyJoker(id) {
             if (this.state !== 'SHOP') return;
-            const jokerDef = JOKER_DEFINITIONS.find(j => j.id === id);
-            if (jokerDef && this.money >= jokerDef.cost) {
+            // Find in shop
+            const shopIndex = this.shop.jokers.findIndex(j => j.id === id);
+            if (shopIndex === -1) return false;
+
+            const jokerDef = this.shop.jokers[shopIndex];
+
+            if (this.money >= jokerDef.cost) {
                 if (this.jokerManager.addJoker(id)) {
                     this.money -= jokerDef.cost;
+                    // Remove from shop
+                    this.shop.jokers.splice(shopIndex, 1);
                     this.emitUpdate();
                     return true;
                 }
@@ -496,13 +588,19 @@
 
         buyConsumable(id) {
             if (this.state !== 'SHOP') return;
-            const item = CONSUMABLE_DEFINITIONS.find(c => c.id === id);
-            if (item && this.money >= item.cost) {
+            const shopIndex = this.shop.consumables.findIndex(c => c.id === id);
+            if (shopIndex === -1) return false;
+
+            const item = this.shop.consumables[shopIndex];
+
+            if (this.money >= item.cost) {
                 // Find empty slot
                 const slotIndex = this.consumables.findIndex(s => s === null);
                 if (slotIndex !== -1) {
                     this.consumables[slotIndex] = { ...item };
                     this.money -= item.cost;
+                    // Remove from shop
+                    this.shop.consumables.splice(shopIndex, 1);
                     this.emitUpdate();
                     return true;
                 }
@@ -512,13 +610,18 @@
 
         buyVoucher(id) {
             if (this.state !== 'SHOP') return;
-            // Check if already owned
             if (this.vouchers.includes(id)) return false;
 
-            const item = VOUCHER_DEFINITIONS.find(v => v.id === id);
-            if (item && this.money >= item.cost) {
+            const shopIndex = this.shop.vouchers.findIndex(v => v.id === id);
+            if (shopIndex === -1) return false;
+
+            const item = this.shop.vouchers[shopIndex];
+
+            if (this.money >= item.cost) {
                 this.vouchers.push(id);
                 this.money -= item.cost;
+                // Remove from shop
+                this.shop.vouchers.splice(shopIndex, 1);
                 this.emitUpdate();
                 return true;
             }
@@ -534,26 +637,86 @@
             if (!item) return;
 
             // Effect Logic
+            let used = false;
             if (item.type === 'planet') {
                 if (this.handLevels[item.target]) {
                     this.handLevels[item.target]++;
-                    this.consumables[index] = null;
-                    this.emitUpdate();
+                    used = true;
                 }
             } else if (item.type === 'tarot') {
                 const selected = this.getSelectedCards();
-                let used = false;
 
                 if (item.id === 'tarot_strength') {
                     // Increase rank of up to 2 cards
                     if (selected.length > 0 && selected.length <= 2) {
                         selected.forEach(c => {
-                            // Simple rank up logic (2->3... K->A)
-                            // Ideally needs a rank map lookup to next rank
-                            c.value += 1; // Simplified: just buff value for now or logic needed
-                            // Proper logic would be changing c.rank string
+                            const idx = RANKS.indexOf(c.rank);
+                            if (idx !== -1 && idx < RANKS.length - 1) {
+                                const nextRank = RANKS[idx + 1];
+                                c.rank = nextRank;
+                                c.value = RANK_VALUES[nextRank];
+                            }
                         });
                         used = true;
+                    }
+                } else if (item.id === 'tarot_death') {
+                    if (selected.length === 2) {
+                        const left = selected[0];
+                        const right = selected[1];
+
+                        left.suit = right.suit;
+                        left.rank = right.rank;
+                        left.value = right.value;
+                        left.chipBonus = right.chipBonus;
+                        left.multBonus = right.multBonus;
+                        used = true;
+                    }
+                } else if (item.id === 'tarot_fool') {
+                    if (this.lastUsedConsumable) {
+                         // Find empty slot
+                        const slotIndex = this.consumables.findIndex(s => s === null && s !== item); // Avoid self slot? actually index is cleared later
+                        // The current slot (index) will be cleared. We need another empty slot.
+                        // Or can we spawn it into the current slot?
+                        // "Spawns last used". Usually you need space.
+                        // If no space, it might fail or replace?
+                        // Balatro: "Create...". If full, says "No Space".
+                        // So check for another null slot.
+                        // Wait, if I use Fool (at index 0), index 0 becomes null. Can I spawn it there?
+                        // Logic: 1. Mark used = true. 2. Clear slot. 3. Add new item.
+                        // But I clear slot at end of function.
+                        // So I need to find a slot that is NOT 'index'.
+                        const emptySlot = this.consumables.findIndex((s, i) => s === null && i !== index);
+                        if (emptySlot !== -1) {
+                            this.consumables[emptySlot] = { ...this.lastUsedConsumable };
+                            used = true;
+                        } else {
+                            // If index is the only slot, we will clear it.
+                            // Can we spawn it in 'index' AFTER clearing?
+                            // Yes, if we special case it.
+                            // But simpler: Just set used=true, and in cleanup:
+                            // if (item.id === 'fool') replace current slot with last used?
+                            // No, standard flow is safer.
+                            // Let's assume we need an empty slot elsewhere for now, or refine logic.
+                            // Actually, if we allow replacing the fool card itself:
+                            // this.consumables[index] = this.lastUsedConsumable;
+                            // return; // Early exit to avoid clearing it?
+                            // Let's try to stick to standard flow.
+                            // If I have [Fool, Null], use Fool -> [Null, LastUsed].
+                            // If I have [Fool, Planet], use Fool -> No space?
+                            // In Balatro, if you have 2 slots and both full, you use one, now you have 1 empty.
+                            // So yes, it spawns into the slot you just freed.
+                            // But here code clears it AFTER.
+                            // So I will just overwrite `this.consumables[index]` with the new item and set used=false so it doesn't get cleared?
+                            // Or handle it here.
+                            this.consumables[index] = { ...this.lastUsedConsumable };
+                            // Don't mark 'used' in the sense of clearing the slot.
+                            // But we need to record 'Fool' as used? No, Fool is excluded from Last Used.
+                            // So we just swapped Fool for Last Used.
+                            // And we don't update lastUsedConsumable.
+                            // Return early.
+                            this.emitUpdate();
+                            return;
+                        }
                     }
                 } else if (item.id === 'tarot_empress') {
                      // Enhance 2 cards to Mult Cards
@@ -570,11 +733,24 @@
                 }
 
                 if (used) {
+                    // Update Last Used (exclude Fool)
+                    if (item.id !== 'tarot_fool') {
+                        this.lastUsedConsumable = item;
+                    }
+
                     this.consumables[index] = null;
                     // Deselect
                     this.hand.forEach(c => c.selected = false);
                     this.emitUpdate();
                 }
+            }
+            // Planet used logic was separate, merge it
+            if (item.type === 'planet' && used) {
+                if (item.id !== 'tarot_fool') {
+                    this.lastUsedConsumable = item;
+                }
+                this.consumables[index] = null;
+                this.emitUpdate();
             }
         }
 

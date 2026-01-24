@@ -377,59 +377,92 @@ class BalatroView {
         this.shopMoney.innerText = `$${state.money}`;
         this.shopItems.innerHTML = '';
 
-        // Jokers Section
-        const jokerHeader = document.createElement('h3');
-        jokerHeader.innerText = "Jokers";
-        this.shopItems.appendChild(jokerHeader);
+        // Layout Container
+        const layout = document.createElement('div');
+        layout.className = 'shop-layout';
 
-        const ownedIds = state.jokers.map(j => j.id);
-        const availableJokers = window.JOKER_DEFINITIONS.filter(j => !ownedIds.includes(j.id));
+        // --- Left Column: Vouchers & Reroll ---
+        const leftCol = document.createElement('div');
+        leftCol.className = 'shop-column shop-col-left';
 
-        const jokerGrid = document.createElement('div');
-        jokerGrid.className = 'shop-items-grid';
+        // Voucher
+        const voucherLabel = document.createElement('div');
+        voucherLabel.className = 'shop-section-title';
+        voucherLabel.innerText = 'Voucher';
+        leftCol.appendChild(voucherLabel);
 
-        availableJokers.forEach(item => {
-            const el = this.createShopItemEl(item, () => this.game.buyJoker(item.id));
-            jokerGrid.appendChild(el);
-        });
-        this.shopItems.appendChild(jokerGrid);
-
-        // Consumables Section
-        const consHeader = document.createElement('h3');
-        consHeader.innerText = "Consumables";
-        this.shopItems.appendChild(consHeader);
-
-        const consGrid = document.createElement('div');
-        consGrid.className = 'shop-items-grid';
-
-        // Show random subset of Planets/Tarots? For now show all Planets
-        const availableCons = window.CONSUMABLE_DEFINITIONS.slice(0, 5); // Just first 5 for demo
-        availableCons.forEach(item => {
-             const el = this.createShopItemEl(item, () => this.game.buyConsumable(item.id));
-             consGrid.appendChild(el);
-        });
-        this.shopItems.appendChild(consGrid);
-
-        // Vouchers Section
-        const voucherHeader = document.createElement('h3');
-        voucherHeader.innerText = "Vouchers";
-        this.shopItems.appendChild(voucherHeader);
-
-        const voucherGrid = document.createElement('div');
-        voucherGrid.className = 'shop-items-grid';
-
-        // Pick one random voucher not owned
-        const availableVouchers = window.VOUCHER_DEFINITIONS.filter(v => !state.vouchers.includes(v.id));
-        if (availableVouchers.length > 0) {
-            // Just show first one for now or random
-            const item = availableVouchers[0];
-            const el = this.createShopItemEl(item, () => this.game.buyVoucher(item.id));
-            el.classList.add('voucher-item');
-            voucherGrid.appendChild(el);
+        const voucherArea = document.createElement('div');
+        if (this.game.shop.vouchers.length > 0) {
+             const v = this.game.shop.vouchers[0];
+             const el = this.createShopItemEl(v, () => this.game.buyVoucher(v.id));
+             el.classList.add('voucher-item');
+             voucherArea.appendChild(el);
         } else {
-             voucherGrid.innerHTML = "<div>Sold Out</div>";
+            voucherArea.innerHTML = "<div style='font-size:12px;color:#888'>Sold Out</div>";
         }
-        this.shopItems.appendChild(voucherGrid);
+        leftCol.appendChild(voucherArea);
+
+        // Spacer
+        leftCol.appendChild(document.createElement('div')).style.flexGrow = '1';
+
+        // Reroll
+        const isFree = this.game.tags.some(t => t.id === 'tag_d6');
+        const rerollBtn = document.createElement('button');
+        rerollBtn.className = 'nata-btn nata-btn-secondary';
+        rerollBtn.style.fontSize = '12px';
+        rerollBtn.style.padding = '5px 10px';
+        rerollBtn.style.width = '100%';
+        rerollBtn.innerHTML = `REROLL<br><span style="color:var(--nata-red)">$${isFree ? 0 : 5}</span>`;
+        rerollBtn.onclick = () => {
+             this.game.rerollShop();
+        };
+        leftCol.appendChild(rerollBtn);
+
+        layout.appendChild(leftCol);
+
+        // --- Main Column: Jokers & Consumables ---
+        const mainCol = document.createElement('div');
+        mainCol.className = 'shop-column shop-col-main';
+
+        // Jokers
+        const jokerLabel = document.createElement('div');
+        jokerLabel.className = 'shop-section-title';
+        jokerLabel.innerText = 'Jokers';
+        mainCol.appendChild(jokerLabel);
+
+        const jokerRow = document.createElement('div');
+        jokerRow.className = 'shop-row';
+        if (this.game.shop.jokers.length > 0) {
+            this.game.shop.jokers.forEach(item => {
+                const el = this.createShopItemEl(item, () => this.game.buyJoker(item.id));
+                jokerRow.appendChild(el);
+            });
+        } else {
+             jokerRow.innerHTML = "<div style='font-size:12px;color:#888'>Sold Out</div>";
+        }
+        mainCol.appendChild(jokerRow);
+
+        // Consumables
+        const consLabel = document.createElement('div');
+        consLabel.className = 'shop-section-title';
+        consLabel.innerText = 'Consumables';
+        mainCol.appendChild(consLabel);
+
+        const consRow = document.createElement('div');
+        consRow.className = 'shop-row';
+        if (this.game.shop.consumables.length > 0) {
+            this.game.shop.consumables.forEach(item => {
+                const el = this.createShopItemEl(item, () => this.game.buyConsumable(item.id));
+                consRow.appendChild(el);
+            });
+        } else {
+             consRow.innerHTML = "<div style='font-size:12px;color:#888'>Sold Out</div>";
+        }
+        mainCol.appendChild(consRow);
+
+        layout.appendChild(mainCol);
+
+        this.shopItems.appendChild(layout);
     }
 
     createShopItemEl(item, buyAction) {
