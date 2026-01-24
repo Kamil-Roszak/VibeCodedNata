@@ -98,7 +98,8 @@ class BalatroView {
             }
         });
 
-        this.game.startRound();
+        // Start with Blind Select
+        this.game.prepareBlindSelect();
         console.log("BalatroView initialized");
     }
 

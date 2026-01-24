@@ -297,6 +297,7 @@
             }
 
             this.deck.reset();
+            this.hand = []; // Clear previous hand
             this.drawHand();
             this.state = 'PLAYING';
             this.emitUpdate();
