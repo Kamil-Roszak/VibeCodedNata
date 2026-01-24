@@ -3,34 +3,95 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-    <title>Nata Catch</title>
-    <link rel="stylesheet" href="style.css">
+    <title>Nata World</title>
+    <link rel="stylesheet" href="css/style.css">
 </head>
 <body>
-    <div id="gameContainer">
-        <canvas id="gameCanvas"></canvas>
+    <div id="bg-container"></div>
 
-        <div id="hud" class="hidden">
-            <div id="scoreBoard">SCORE: <span id="score">0</span></div>
-            <button id="audioBtn">🔊</button>
-            <div id="livesBoard"><span id="lives">❤❤❤</span></div>
-        </div>
+    <header class="app-header">
+        <div class="logo-small">NATA COLA</div>
+        <div class="user-stats">Points: <span id="user-points-display">0</span></div>
+    </header>
 
-        <div id="startScreen" class="overlay">
-            <img src="assets/nata_logo.svg" alt="Nata Logo" id="logo">
-            <h1>Nata Catch</h1>
-            <p>Złap butelki Nata Cola!</p>
-            <p>Najlepszy wynik: <span id="highScoreStart">0</span></p>
-            <button id="startBtn">GRAJ</button>
-        </div>
+    <main id="app-container">
+        <!-- Main Menu -->
+        <section id="menu-view" class="view-section active-view">
+            <div class="menu-content">
+                <img src="assets/nata_logo.svg" alt="Nata Logo" class="main-logo">
+                <h1>NATA WORLD</h1>
+                <div class="menu-buttons">
+                    <button class="menu-btn primary" data-nav="game-view">PLAY NATA CATCH</button>
+                    <button class="menu-btn" data-nav="shop-view">BADGE SHOP</button>
+                    <button class="menu-btn" data-nav="profile-view">MY PROFILE</button>
+                    <button class="menu-btn disabled">COMING SOON...</button>
+                </div>
+            </div>
+        </section>
 
-        <div id="gameOverScreen" class="overlay hidden">
-            <h1>Koniec gry!</h1>
-            <p>Twój wynik: <span id="finalScore">0</span></p>
-            <p>Najlepszy wynik: <span id="highScoreEnd">0</span></p>
-            <button id="restartBtn">ZAGRAJ PONOWNIE</button>
-        </div>
-    </div>
-    <script src="script.js"></script>
+        <!-- Game View -->
+        <section id="game-view" class="view-section hidden-view">
+            <button class="back-btn top-left" data-nav="menu-view">Exit</button>
+            <div id="gameContainer">
+                <canvas id="gameCanvas"></canvas>
+
+                <div id="hud" class="hidden">
+                    <div id="scoreBoard">SCORE: <span id="score">0</span></div>
+                    <button id="audioBtn">🔊</button>
+                    <div id="livesBoard"><span id="lives">❤❤❤</span></div>
+                </div>
+
+                <div id="startScreen" class="overlay">
+                    <h2>Nata Catch</h2>
+                    <p>Move the crate to catch the bottles!</p>
+                    <button id="startBtn">START GAME</button>
+                </div>
+
+                <div id="gameOverScreen" class="overlay hidden">
+                    <h1>Game Over!</h1>
+                    <p>Score: <span id="finalScore">0</span></p>
+                    <div class="button-group">
+                        <button id="restartBtn">RETRY</button>
+                        <button id="backToMenuBtn" class="secondary">MENU</button>
+                    </div>
+                </div>
+            </div>
+        </section>
+
+        <!-- Shop View -->
+        <section id="shop-view" class="view-section hidden-view">
+            <div class="view-header">
+                <button class="back-btn" data-nav="menu-view">← Back</button>
+                <h2>Badge Shop</h2>
+            </div>
+            <div id="shop-list" class="shop-grid">
+                <!-- Populated by JS -->
+            </div>
+        </section>
+
+        <!-- Profile View -->
+        <section id="profile-view" class="view-section hidden-view">
+            <div class="view-header">
+                <button class="back-btn" data-nav="menu-view">← Back</button>
+                <h2>My Profile</h2>
+            </div>
+            <div class="profile-content">
+                <div class="profile-card">
+                    <h3>Player Stats</h3>
+                    <p>Total Points Earned: <span id="profile-total-points">0</span></p>
+                </div>
+                <h3>My Badges</h3>
+                <div id="profile-badges" class="badges-grid">
+                    <!-- Populated by JS -->
+                </div>
+            </div>
+        </section>
+    </main>
+
+    <!-- Scripts -->
+    <script src="vendor/three.min.js"></script>
+    <script src="js/three-bg.js"></script>
+    <script src="js/game-natacatch.js"></script>
+    <script src="js/app.js"></script>
 </body>
 </html>

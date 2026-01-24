@@ -1,0 +1,337 @@
+:root {
+    --nata-red: #E30613;
+    --nata-dark: #b0040e;
+    --text-color: #333;
+    --bg-overlay: rgba(255, 255, 255, 0.95);
+}
+
+body, html {
+    margin: 0;
+    padding: 0;
+    width: 100%;
+    height: 100%;
+    font-family: 'Arial', sans-serif;
+    overflow: hidden; /* Prevent scrolling on mobile */
+    background-color: #8B0000; /* Fallback */
+    color: var(--text-color);
+}
+
+/* Background Visuals */
+#bg-container {
+    position: fixed;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    z-index: -1;
+}
+
+/* App Header */
+.app-header {
+    position: fixed;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 50px;
+    background: rgba(0, 0, 0, 0.5);
+    backdrop-filter: blur(5px);
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    padding: 0 20px;
+    box-sizing: border-box;
+    color: white;
+    z-index: 100;
+}
+
+.logo-small {
+    font-weight: bold;
+    letter-spacing: 1px;
+}
+
+.user-stats {
+    font-weight: bold;
+    color: #ffd700;
+}
+
+/* View Management */
+#app-container {
+    width: 100%;
+    height: 100%;
+    position: relative;
+    padding-top: 50px; /* Header space */
+    box-sizing: border-box;
+}
+
+.view-section {
+    width: 100%;
+    height: 100%;
+    position: absolute;
+    top: 0;
+    left: 0;
+    padding-top: 50px;
+    box-sizing: border-box;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    overflow-y: auto;
+    transition: opacity 0.3s ease;
+}
+
+.active-view {
+    opacity: 1;
+    pointer-events: auto;
+    z-index: 10;
+}
+
+.hidden-view {
+    opacity: 0;
+    pointer-events: none;
+    z-index: 0;
+}
+
+/* Menu View */
+.menu-content {
+    text-align: center;
+    background: var(--bg-overlay);
+    padding: 40px;
+    border-radius: 20px;
+    box-shadow: 0 10px 30px rgba(0,0,0,0.3);
+    margin-top: 50px;
+    max-width: 400px;
+    width: 90%;
+}
+
+.main-logo {
+    width: 100px;
+    margin-bottom: 20px;
+}
+
+.menu-buttons {
+    display: flex;
+    flex-direction: column;
+    gap: 15px;
+}
+
+.menu-btn {
+    padding: 15px 30px;
+    font-size: 18px;
+    border: none;
+    border-radius: 30px;
+    cursor: pointer;
+    background: white;
+    color: var(--nata-red);
+    border: 2px solid var(--nata-red);
+    font-weight: bold;
+    transition: all 0.2s;
+}
+
+.menu-btn.primary {
+    background: var(--nata-red);
+    color: white;
+    font-size: 20px;
+}
+
+.menu-btn:hover:not(.disabled) {
+    transform: scale(1.05);
+}
+
+.menu-btn.disabled {
+    opacity: 0.5;
+    cursor: not-allowed;
+    border-color: #ccc;
+    color: #999;
+}
+
+/* Shop View */
+.shop-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+    gap: 20px;
+    padding: 20px;
+    width: 100%;
+    max-width: 800px;
+}
+
+.badge-item {
+    background: white;
+    border-radius: 15px;
+    padding: 20px;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    text-align: center;
+    box-shadow: 0 5px 15px rgba(0,0,0,0.1);
+}
+
+.badge-item.owned {
+    border: 2px solid gold;
+    background: #fffdf0;
+}
+
+.badge-icon {
+    font-size: 40px;
+    margin-bottom: 10px;
+}
+
+.shop-btn {
+    margin-top: 15px;
+    padding: 8px 20px;
+    background: var(--nata-red);
+    color: white;
+    border: none;
+    border-radius: 20px;
+    cursor: pointer;
+}
+
+.shop-btn:disabled {
+    background: #ccc;
+    cursor: default;
+}
+
+/* Profile View */
+.profile-content {
+    background: var(--bg-overlay);
+    padding: 30px;
+    border-radius: 20px;
+    width: 90%;
+    max-width: 600px;
+    margin-top: 20px;
+    text-align: center;
+}
+
+.badges-grid {
+    display: flex;
+    flex-wrap: wrap;
+    justify-content: center;
+    gap: 15px;
+    margin-top: 20px;
+}
+
+.badge-item.mini {
+    width: 100px;
+    padding: 10px;
+    font-size: 14px;
+}
+
+/* Game View Wrapper */
+#game-view {
+    padding: 0; /* Full screen game */
+}
+
+#gameContainer {
+    position: relative;
+    width: 100%;
+    height: 100%;
+    background: transparent;
+}
+
+canvas {
+    display: block;
+    width: 100%;
+    height: 100%;
+}
+
+.back-btn {
+    background: white;
+    border: 1px solid #ccc;
+    padding: 5px 15px;
+    border-radius: 15px;
+    cursor: pointer;
+    font-weight: bold;
+}
+
+.back-btn.top-left {
+    position: absolute;
+    top: 60px;
+    left: 20px;
+    z-index: 200;
+}
+
+.view-header {
+    background: white;
+    width: 100%;
+    padding: 10px 20px;
+    display: flex;
+    align-items: center;
+    gap: 20px;
+    box-shadow: 0 2px 5px rgba(0,0,0,0.1);
+}
+
+/* Game Overlays (From original) */
+.overlay {
+    position: absolute;
+    top: 50%;
+    left: 50%;
+    transform: translate(-50%, -50%);
+    background: rgba(255, 255, 255, 0.95);
+    padding: 2rem;
+    border-radius: 20px;
+    text-align: center;
+    box-shadow: 0 10px 30px rgba(0,0,0,0.2);
+    width: 80%;
+    max-width: 400px;
+    border: 4px solid var(--nata-red);
+    z-index: 50;
+}
+
+.hidden {
+    display: none !important;
+}
+
+#hud {
+    position: absolute;
+    top: 60px; /* Below header */
+    left: 0;
+    width: 100%;
+    padding: 10px 20px;
+    box-sizing: border-box;
+    display: flex;
+    justify-content: space-between;
+    font-size: 24px;
+    font-weight: bold;
+    color: white;
+    text-shadow: 2px 2px 0 var(--nata-red);
+    pointer-events: none; /* Let clicks pass through */
+}
+
+#audioBtn {
+    pointer-events: auto;
+    background: none;
+    border: none;
+    font-size: 24px;
+    cursor: pointer;
+}
+
+button {
+    font-family: inherit;
+}
+
+#startBtn, #restartBtn {
+    background: var(--nata-red);
+    color: white;
+    border: none;
+    padding: 15px 40px;
+    font-size: 20px;
+    border-radius: 50px;
+    cursor: pointer;
+    margin-top: 20px;
+    box-shadow: 0 4px 0 var(--nata-dark);
+    transition: transform 0.1s;
+}
+
+#startBtn:active, #restartBtn:active {
+    transform: translateY(4px);
+    box-shadow: none;
+}
+
+#backToMenuBtn {
+    background: white;
+    color: var(--nata-red);
+    border: 2px solid var(--nata-red);
+    padding: 10px 20px;
+    font-size: 16px;
+    border-radius: 50px;
+    cursor: pointer;
+    margin-left: 10px;
+}
