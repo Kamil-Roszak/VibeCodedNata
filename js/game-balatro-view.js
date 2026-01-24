@@ -377,21 +377,33 @@ class BalatroView {
         this.shopMoney.innerText = `$${state.money}`;
         this.shopItems.innerHTML = '';
 
+        // Reroll
+        const rerollContainer = document.createElement('div');
+        rerollContainer.style.marginBottom = '20px';
+        const rerollBtn = document.createElement('button');
+        rerollBtn.className = 'nata-btn';
+
+        const isFree = this.game.tags.some(t => t.id === 'tag_d6');
+        rerollBtn.innerText = `Reroll ($${isFree ? 0 : 5})`;
+        rerollBtn.onclick = () => {
+             this.game.rerollShop();
+        };
+        rerollContainer.appendChild(rerollBtn);
+        this.shopItems.appendChild(rerollContainer);
+
         // Jokers Section
         const jokerHeader = document.createElement('h3');
         jokerHeader.innerText = "Jokers";
         this.shopItems.appendChild(jokerHeader);
 
-        const ownedIds = state.jokers.map(j => j.id);
-        const availableJokers = window.JOKER_DEFINITIONS.filter(j => !ownedIds.includes(j.id));
-
         const jokerGrid = document.createElement('div');
         jokerGrid.className = 'shop-items-grid';
 
-        availableJokers.forEach(item => {
+        this.game.shop.jokers.forEach(item => {
             const el = this.createShopItemEl(item, () => this.game.buyJoker(item.id));
             jokerGrid.appendChild(el);
         });
+        if (this.game.shop.jokers.length === 0) jokerGrid.innerHTML = "<div>Sold Out</div>";
         this.shopItems.appendChild(jokerGrid);
 
         // Consumables Section
@@ -402,12 +414,11 @@ class BalatroView {
         const consGrid = document.createElement('div');
         consGrid.className = 'shop-items-grid';
 
-        // Show random subset of Planets/Tarots? For now show all Planets
-        const availableCons = window.CONSUMABLE_DEFINITIONS.slice(0, 5); // Just first 5 for demo
-        availableCons.forEach(item => {
+        this.game.shop.consumables.forEach(item => {
              const el = this.createShopItemEl(item, () => this.game.buyConsumable(item.id));
              consGrid.appendChild(el);
         });
+        if (this.game.shop.consumables.length === 0) consGrid.innerHTML = "<div>Sold Out</div>";
         this.shopItems.appendChild(consGrid);
 
         // Vouchers Section
@@ -418,17 +429,12 @@ class BalatroView {
         const voucherGrid = document.createElement('div');
         voucherGrid.className = 'shop-items-grid';
 
-        // Pick one random voucher not owned
-        const availableVouchers = window.VOUCHER_DEFINITIONS.filter(v => !state.vouchers.includes(v.id));
-        if (availableVouchers.length > 0) {
-            // Just show first one for now or random
-            const item = availableVouchers[0];
+        this.game.shop.vouchers.forEach(item => {
             const el = this.createShopItemEl(item, () => this.game.buyVoucher(item.id));
             el.classList.add('voucher-item');
             voucherGrid.appendChild(el);
-        } else {
-             voucherGrid.innerHTML = "<div>Sold Out</div>";
-        }
+        });
+        if (this.game.shop.vouchers.length === 0) voucherGrid.innerHTML = "<div>Sold Out</div>";
         this.shopItems.appendChild(voucherGrid);
     }
 

@@ -153,10 +153,13 @@
 
     // Export
     if (typeof module !== 'undefined' && module.exports) {
-        module.exports = { Card, Deck, HandEvaluator };
+        module.exports = { Card, Deck, HandEvaluator, SUITS, RANKS, RANK_VALUES };
     } else {
         window.Card = Card;
         window.Deck = Deck;
         window.HandEvaluator = HandEvaluator;
+        window.SUITS = SUITS;
+        window.RANKS = RANKS;
+        window.RANK_VALUES = RANK_VALUES;
     }
 })();
