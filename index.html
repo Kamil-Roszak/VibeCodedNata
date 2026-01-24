@@ -4,6 +4,7 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
     <title>Nata World</title>
+    <link rel="stylesheet" href="css/ui.css">
     <link rel="stylesheet" href="css/style.css">
     <link rel="stylesheet" href="css/match3.css">
 </head>
@@ -18,21 +19,21 @@
     <main id="app-container">
         <!-- Main Menu -->
         <section id="menu-view" class="view-section active-view">
-            <div class="menu-content">
+            <div class="menu-content nata-overlay visible" style="position: relative; top: auto; left: auto; transform: none; margin-top: 50px;">
                 <img src="assets/nata_logo.svg" alt="Nata Logo" class="main-logo">
                 <h1>NATA WORLD</h1>
                 <div class="menu-buttons">
-                    <button class="menu-btn primary" data-nav="game-view">PLAY NATA CATCH</button>
-                    <button class="menu-btn primary" data-nav="level-select-view">PLAY NATA CRUSH</button>
-                    <button class="menu-btn" data-nav="shop-view">BADGE SHOP</button>
-                    <button class="menu-btn" data-nav="profile-view">MY PROFILE</button>
+                    <button class="nata-btn nata-btn-primary" data-nav="game-view">PLAY NATA CATCH</button>
+                    <button class="nata-btn nata-btn-primary" data-nav="level-select-view">PLAY NATA CRUSH</button>
+                    <button class="nata-btn nata-btn-secondary" data-nav="shop-view">BADGE SHOP</button>
+                    <button class="nata-btn nata-btn-secondary" data-nav="profile-view">MY PROFILE</button>
                 </div>
             </div>
         </section>
 
-        <!-- Game View -->
+        <!-- Game View (Nata Catch) -->
         <section id="game-view" class="view-section hidden-view">
-            <button class="back-btn top-left" data-nav="menu-view">Exit</button>
+            <button class="nata-btn nata-btn-secondary" style="position: absolute; top: 60px; left: 20px; z-index: 200; padding: 5px 15px; font-size: 14px;" data-nav="menu-view">Exit</button>
             <div id="gameContainer">
                 <canvas id="gameCanvas"></canvas>
 
@@ -42,18 +43,18 @@
                     <div id="livesBoard"><span id="lives">❤❤❤</span></div>
                 </div>
 
-                <div id="startScreen" class="overlay">
+                <div id="startScreen" class="nata-overlay visible">
                     <h2>Nata Catch</h2>
                     <p>Move the crate to catch the bottles!</p>
-                    <button id="startBtn">START GAME</button>
+                    <button id="startBtn" class="nata-btn nata-btn-primary">START GAME</button>
                 </div>
 
-                <div id="gameOverScreen" class="overlay hidden">
+                <div id="gameOverScreen" class="nata-overlay">
                     <h1>Game Over!</h1>
                     <p>Score: <span id="finalScore">0</span></p>
                     <div class="button-group">
-                        <button id="restartBtn">RETRY</button>
-                        <button id="backToMenuBtn" class="secondary">MENU</button>
+                        <button id="restartBtn" class="nata-btn nata-btn-primary">RETRY</button>
+                        <button id="backToMenuBtn" class="nata-btn nata-btn-secondary">MENU</button>
                     </div>
                 </div>
             </div>
@@ -61,25 +62,25 @@
 
         <!-- Shop View -->
         <section id="shop-view" class="view-section hidden-view">
-            <div class="view-header">
-                <button class="back-btn" data-nav="menu-view">← Back</button>
-                <h2>Badge Shop</h2>
+            <div class="nata-view-header">
+                <button class="nata-btn nata-btn-secondary" style="padding: 5px 15px; font-size: 14px;" data-nav="menu-view">← Back</button>
+                <h2 class="nata-view-title">Badge Shop</h2>
             </div>
-            <div id="shop-list" class="shop-grid">
+            <div id="shop-list" class="nata-grid-shop">
                 <!-- Populated by JS -->
             </div>
         </section>
 
         <!-- Profile View -->
         <section id="profile-view" class="view-section hidden-view">
-            <div class="view-header">
-                <button class="back-btn" data-nav="menu-view">← Back</button>
-                <h2>My Profile</h2>
+            <div class="nata-view-header">
+                <button class="nata-btn nata-btn-secondary" style="padding: 5px 15px; font-size: 14px;" data-nav="menu-view">← Back</button>
+                <h2 class="nata-view-title">My Profile</h2>
             </div>
-            <div class="profile-content">
-                <div class="profile-card">
+            <div class="profile-content nata-card" style="margin-top: 20px; width: 90%; max-width: 600px;">
+                <div class="profile-header">
                     <h3>Player Stats</h3>
-                    <p>Total Points Earned: <span id="profile-total-points">0</span></p>
+                    <p>Total Points Earned: <span id="profile-total-points" class="nata-header-badge">0</span></p>
                 </div>
                 <h3>My Badges</h3>
                 <div id="profile-badges" class="badges-grid">
@@ -90,9 +91,9 @@
 
         <!-- Match 3 Level Select View -->
         <section id="level-select-view" class="view-section hidden-view">
-            <div class="view-header">
-                <button class="back-btn" data-nav="menu-view">← Back</button>
-                <h2>Nata Crush</h2>
+            <div class="nata-view-header">
+                <button class="nata-btn nata-btn-secondary" style="padding: 5px 15px; font-size: 14px;" data-nav="menu-view">← Back</button>
+                <h2 class="nata-view-title">Nata Crush</h2>
             </div>
             <div id="level-map" class="level-scroll-container">
                 <!-- Populated by JS -->
@@ -101,26 +102,26 @@
 
         <!-- Match 3 Game View -->
         <section id="match3-view" class="view-section hidden-view">
-            <button class="back-btn top-left" id="exitMatch3Btn">Exit</button>
+            <button class="nata-btn nata-btn-secondary" id="exitMatch3Btn" style="position: absolute; top: 60px; left: 20px; z-index: 200; padding: 5px 15px; font-size: 14px;">Exit</button>
             <div id="match3Container">
                 <canvas id="match3Canvas"></canvas>
 
                 <div id="match3-hud">
-                    <div>Moves: <span id="m3-moves">0</span></div>
-                    <div>Score: <span id="m3-score">0</span> / <span id="m3-target">0</span></div>
+                    <div class="nata-header-badge">Moves: <span id="m3-moves">0</span></div>
+                    <div class="nata-header-badge">Score: <span id="m3-score">0</span> / <span id="m3-target">0</span></div>
                 </div>
 
-                <div id="match3-start" class="overlay">
+                <div id="match3-start" class="nata-overlay visible">
                     <h2>Level <span id="m3-level-num">1</span></h2>
                     <p>Target: <span id="m3-start-target">1000</span></p>
-                    <button id="m3-play-btn">START</button>
+                    <button id="m3-play-btn" class="nata-btn nata-btn-primary">START</button>
                 </div>
 
-                <div id="match3-end" class="overlay hidden">
+                <div id="match3-end" class="nata-overlay">
                     <h1 id="m3-end-title">You Win!</h1>
-                    <div id="m3-stars">⭐⭐⭐</div>
+                    <div id="m3-stars" style="font-size: 30px; margin-bottom: 10px;">⭐⭐⭐</div>
                     <p>Score: <span id="m3-end-score">0</span></p>
-                    <button id="m3-next-btn">CONTINUE</button>
+                    <button id="m3-next-btn" class="nata-btn nata-btn-primary">CONTINUE</button>
                 </div>
             </div>
         </section>

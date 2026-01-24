@@ -51,8 +51,20 @@ class Match3Game {
 
     bindEvents() {
         this.handleTouch = this.handleInput.bind(this);
+        this.handleResize = this.resize.bind(this);
+
         this.canvas.addEventListener('click', this.handleTouch);
-        window.addEventListener('resize', () => this.resize());
+        window.addEventListener('resize', this.handleResize);
+    }
+
+    dispose() {
+        this.isPlaying = false;
+        if (this.handleTouch) {
+            this.canvas.removeEventListener('click', this.handleTouch);
+        }
+        if (this.handleResize) {
+            window.removeEventListener('resize', this.handleResize);
+        }
     }
 
     resize() {

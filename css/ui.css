@@ -1,0 +1,206 @@
+:root {
+    --nata-red: #E30613;
+    --nata-red-dark: #b0040e;
+    --nata-blue: #004D9D;
+    --nata-gold: #FFD700;
+    --nata-white: #ffffff;
+    --nata-black: #222222;
+    --nata-gray: #f5f5f5;
+
+    --shadow-soft: 0 5px 15px rgba(0,0,0,0.1);
+    --shadow-hard: 0 4px 0 var(--nata-red-dark);
+    --radius-md: 15px;
+    --radius-lg: 25px;
+    --radius-pill: 50px;
+}
+
+/* Nata Button */
+.nata-btn {
+    display: inline-block;
+    padding: 12px 30px;
+    font-size: 18px;
+    font-weight: bold;
+    text-transform: uppercase;
+    border: none;
+    border-radius: var(--radius-pill);
+    cursor: pointer;
+    transition: transform 0.1s, filter 0.2s;
+    text-decoration: none;
+    box-shadow: var(--shadow-hard);
+    margin: 5px;
+}
+
+.nata-btn:active:not(:disabled) {
+    transform: translateY(4px);
+    box-shadow: none;
+}
+
+.nata-btn:disabled {
+    background: #ccc;
+    color: #888;
+    box-shadow: none;
+    cursor: not-allowed;
+    transform: none;
+}
+
+.nata-btn-primary {
+    background: var(--nata-red);
+    color: var(--nata-white);
+}
+
+.nata-btn-secondary {
+    background: var(--nata-white);
+    color: var(--nata-red);
+    border: 2px solid var(--nata-red);
+}
+
+.nata-btn-blue {
+    background: var(--nata-blue);
+    color: var(--nata-white);
+    box-shadow: 0 4px 0 #003366;
+}
+
+/* Nata Card */
+.nata-card {
+    background: var(--nata-white);
+    border-radius: var(--radius-md);
+    padding: 20px;
+    box-shadow: var(--shadow-soft);
+    margin-bottom: 20px;
+}
+
+/* Nata Modal / Overlay */
+.nata-overlay {
+    position: absolute;
+    top: 50%;
+    left: 50%;
+    transform: translate(-50%, -50%);
+    background: var(--nata-white);
+    padding: 30px;
+    border-radius: var(--radius-lg);
+    text-align: center;
+    box-shadow: 0 20px 50px rgba(0,0,0,0.3);
+    width: 90%;
+    max-width: 450px;
+    border: 5px solid var(--nata-red);
+    z-index: 100;
+    opacity: 0;
+    pointer-events: none;
+    transition: opacity 0.3s ease, transform 0.3s ease;
+}
+
+.nata-overlay.visible {
+    opacity: 1;
+    pointer-events: auto;
+    transform: translate(-50%, -50%) scale(1);
+}
+
+.nata-overlay h1, .nata-overlay h2 {
+    color: var(--nata-red);
+    margin-top: 0;
+    font-size: 28px;
+    text-transform: uppercase;
+}
+
+.nata-overlay p {
+    font-size: 18px;
+    color: var(--nata-black);
+    margin-bottom: 25px;
+}
+
+/* Header Badge */
+.nata-header-badge {
+    background: var(--nata-red);
+    color: var(--nata-white);
+    padding: 5px 15px;
+    border-radius: var(--radius-pill);
+    font-weight: bold;
+    font-size: 14px;
+    display: inline-flex;
+    align-items: center;
+    gap: 5px;
+}
+
+/* Grid Layouts */
+.nata-grid-shop {
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(200px, 1fr));
+    gap: 20px;
+    padding: 10px;
+}
+
+.nata-item-card {
+    background: var(--nata-white);
+    border-radius: var(--radius-md);
+    padding: 15px;
+    text-align: center;
+    border: 2px solid transparent;
+    transition: border-color 0.2s;
+    display: flex;
+    flex-direction: column;
+    justify-content: space-between;
+    height: 100%;
+}
+
+.nata-item-card:hover {
+    border-color: var(--nata-red);
+}
+
+.nata-item-card.owned {
+    background: #fffdf0;
+    border-color: var(--nata-gold);
+}
+
+.nata-item-icon {
+    font-size: 48px;
+    margin-bottom: 10px;
+}
+
+.nata-item-title {
+    font-weight: bold;
+    font-size: 18px;
+    margin-bottom: 5px;
+}
+
+.nata-item-desc {
+    font-size: 14px;
+    color: #666;
+    margin-bottom: 15px;
+    flex-grow: 1;
+}
+
+.nata-item-cost {
+    font-weight: bold;
+    color: var(--nata-blue);
+    margin-bottom: 10px;
+}
+
+/* Tabs / View Header */
+.nata-view-header {
+    background: var(--nata-white);
+    padding: 15px 20px;
+    display: flex;
+    align-items: center;
+    gap: 15px;
+    box-shadow: 0 2px 5px rgba(0,0,0,0.05);
+    position: relative;
+    z-index: 50;
+}
+
+.nata-view-title {
+    font-size: 24px;
+    font-weight: bold;
+    color: var(--nata-red);
+    margin: 0;
+}
+
+/* Animations */
+@keyframes nata-pulse {
+    0% { transform: scale(1); }
+    50% { transform: scale(1.05); }
+    100% { transform: scale(1); }
+}
+
+.nata-anim-pulse {
+    animation: nata-pulse 2s infinite;
+}

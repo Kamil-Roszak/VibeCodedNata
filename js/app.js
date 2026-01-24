@@ -131,7 +131,8 @@ document.addEventListener('DOMContentLoaded', () => {
 
         // Clean up old
         if (match3Instance) {
-            match3Instance.stop();
+            if (match3Instance.dispose) match3Instance.dispose();
+            else match3Instance.stop();
             match3Instance = null;
         }
 
@@ -193,7 +194,10 @@ document.addEventListener('DOMContentLoaded', () => {
 
     // Exit Match 3
     document.getElementById('exitMatch3Btn').addEventListener('click', () => {
-        if (match3Instance) match3Instance.stop();
+        if (match3Instance) {
+            if (match3Instance.dispose) match3Instance.dispose();
+            else match3Instance.stop();
+        }
         navigateTo('level-select-view');
     });
 
@@ -300,15 +304,13 @@ function renderShop() {
         const canAfford = userManager.getPoints() >= badge.cost;
 
         const el = document.createElement('div');
-        el.className = `badge-item ${isOwned ? 'owned' : ''}`;
+        el.className = `nata-item-card ${isOwned ? 'owned' : ''}`;
         el.innerHTML = `
-            <div class="badge-icon">${badge.icon}</div>
-            <div class="badge-info">
-                <h3>${badge.name}</h3>
-                <p>${badge.description}</p>
-                <div class="badge-cost">${badge.cost} pts</div>
-            </div>
-            <button class="shop-btn" ${isOwned ? 'disabled' : ''}>
+            <div class="nata-item-icon">${badge.icon}</div>
+            <div class="nata-item-title">${badge.name}</div>
+            <div class="nata-item-desc">${badge.description}</div>
+            <div class="nata-item-cost">${badge.cost} pts</div>
+            <button class="nata-btn ${isOwned ? 'nata-btn-secondary' : 'nata-btn-blue'}" ${isOwned ? 'disabled' : ''}>
                 ${isOwned ? 'Owned' : 'Buy'}
             </button>
         `;
@@ -345,10 +347,11 @@ function renderProfile() {
 
     owned.forEach(badge => {
         const el = document.createElement('div');
-        el.className = 'badge-item owned mini';
+        el.className = 'nata-item-card owned';
+        el.style.width = '120px';
         el.innerHTML = `
-            <div class="badge-icon">${badge.icon}</div>
-            <div class="badge-name">${badge.name}</div>
+            <div class="nata-item-icon" style="font-size: 32px;">${badge.icon}</div>
+            <div class="nata-item-title" style="font-size: 14px;">${badge.name}</div>
         `;
         container.appendChild(el);
     });
