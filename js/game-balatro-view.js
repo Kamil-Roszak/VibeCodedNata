@@ -9,6 +9,7 @@ class BalatroView {
         this.handArea = document.getElementById('b-hand-area');
         this.playArea = document.getElementById('b-play-slots');
         this.jokersArea = document.getElementById('b-jokers-area');
+        this.deckArea = document.getElementById('b-deck-area');
 
         this.elChips = document.getElementById('b-chips');
         this.elMult = document.getElementById('b-mult');
@@ -24,6 +25,8 @@ class BalatroView {
         // Buttons
         this.btnPlay = document.getElementById('b-play-btn');
         this.btnDiscard = document.getElementById('b-discard-btn');
+        this.btnSortRank = document.getElementById('b-sort-rank');
+        this.btnSortSuit = document.getElementById('b-sort-suit');
 
         // Shop
         this.shopOverlay = document.getElementById('b-shop-overlay');
@@ -41,6 +44,10 @@ class BalatroView {
     bindEvents() {
         this.btnPlay.addEventListener('click', () => this.game?.playHand());
         this.btnDiscard.addEventListener('click', () => this.game?.discard());
+
+        if (this.btnSortRank) this.btnSortRank.addEventListener('click', () => this.game?.sortHand('rank'));
+        if (this.btnSortSuit) this.btnSortSuit.addEventListener('click', () => this.game?.sortHand('suit'));
+
         this.btnNextRound.addEventListener('click', () => {
             this.game?.nextRound();
             this.shopOverlay.classList.remove('visible');
@@ -49,12 +56,13 @@ class BalatroView {
 
     init() {
         if (!window.BalatroGame) {
-            console.error("Balatro Logic not loaded");
+            console.warn("Balatro Logic not ready, retrying in 500ms...");
+            setTimeout(() => this.init(), 500);
             return;
         }
 
         // Only init if not already running or force reset
-        this.game = new BalatroGame({
+        this.game = new window.BalatroGame({
             callbacks: {
                 onUpdate: (state) => this.render(state),
                 onHandPlayed: (result) => this.animateScoring(result),
@@ -74,6 +82,15 @@ class BalatroView {
         this.elScore.innerText = state.current;
         this.elHands.innerText = state.handsLeft;
         this.elDiscards.innerText = state.discardsLeft;
+
+        // Deck visual
+        if (this.deckArea) {
+            this.deckArea.innerHTML = `
+                <div class="deck-pile" title="Cards remaining in deck">
+                    DECK<br>${this.game.deck.cards.length}
+                </div>
+            `;
+        }
 
         // Reset score display if new hand
         if (state.state === 'PLAYING') {
