@@ -1,0 +1,35 @@
+<!DOCTYPE html>
+<html lang="pl">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <title>Nata Catch</title>
+    <link rel="stylesheet" href="style.css">
+</head>
+<body>
+    <div id="gameContainer">
+        <canvas id="gameCanvas"></canvas>
+
+        <div id="hud" class="hidden">
+            <div id="scoreBoard">Punkty: <span id="score">0</span></div>
+            <div id="livesBoard">Życia: <span id="lives">3</span></div>
+        </div>
+
+        <div id="startScreen" class="overlay">
+            <img src="assets/nata_logo.svg" alt="Nata Logo" id="logo">
+            <h1>Nata Catch</h1>
+            <p>Złap butelki Nata Cola!</p>
+            <p>Najlepszy wynik: <span id="highScoreStart">0</span></p>
+            <button id="startBtn">GRAJ</button>
+        </div>
+
+        <div id="gameOverScreen" class="overlay hidden">
+            <h1>Koniec gry!</h1>
+            <p>Twój wynik: <span id="finalScore">0</span></p>
+            <p>Najlepszy wynik: <span id="highScoreEnd">0</span></p>
+            <button id="restartBtn">ZAGRAJ PONOWNIE</button>
+        </div>
+    </div>
+    <script src="script.js"></script>
+</body>
+</html>
