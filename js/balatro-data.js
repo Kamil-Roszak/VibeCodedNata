@@ -19,8 +19,8 @@
             desc: '+4 Mult',
             cost: 4,
             asset: 'assets/products/cola.png',
-            type: 'mult_add',
-            value: 4
+            trigger: 'passive', // Applied at end calculation
+            effect: (stats) => { stats.mult += 4; return true; }
         },
         {
             id: 'orange',
@@ -28,8 +28,8 @@
             desc: '+15 Chips',
             cost: 4,
             asset: 'assets/products/orange.png',
-            type: 'chips_add',
-            value: 15
+            trigger: 'passive',
+            effect: (stats) => { stats.chips += 15; return true; }
         },
         {
             id: 'lime',
@@ -37,18 +37,23 @@
             desc: 'x1.5 Mult',
             cost: 6,
             asset: 'assets/products/lime.png',
-            type: 'mult_mult',
-            value: 1.5
+            trigger: 'passive',
+            effect: (stats) => { stats.mult = Math.floor(stats.mult * 1.5); return true; }
         },
         {
             id: 'berry',
             name: 'Nata Berry',
-            desc: '+3 Mult for each Heart played',
+            desc: '+3 Mult for each Heart scored',
             cost: 5,
             asset: 'assets/products/berry.png',
-            type: 'conditional_mult',
-            condition: 'suit_heart',
-            value: 3
+            trigger: 'card_score', // Called per card
+            effect: (stats, card) => {
+                if (card.suit === 'Hearts') {
+                    stats.mult += 3;
+                    return true;
+                }
+                return false;
+            }
         },
         {
             id: 'lemon',
@@ -56,9 +61,14 @@
             desc: '+30 Chips if hand contains a Pair',
             cost: 5,
             asset: 'assets/products/lemon.png',
-            type: 'conditional_chips',
-            condition: 'hand_Pair',
-            value: 30
+            trigger: 'hand_eval', // Called once based on context
+            effect: (stats) => {
+                if (stats.type.includes('Pair')) { // Pair, Two Pair
+                    stats.chips += 30;
+                    return true;
+                }
+                return false;
+            }
         }
     ];
 

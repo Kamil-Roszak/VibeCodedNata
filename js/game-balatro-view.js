@@ -192,39 +192,95 @@ class BalatroView {
         return el;
     }
 
-    animateScoring(result) {
-        // Move cards to play area
-        const selectedEls = this.handArea.querySelectorAll('.selected');
-        selectedEls.forEach(el => {
-            // Cloning isn't great for logic but visually ok
-            // Actually, game state updated and re-rendered hand without them.
-            // So we just visualize result.
-        });
-
-        // Logic removed cards from hand immediately.
-        // We can show "ghosts" in play area?
+    async animateScoring(result) {
+        // 1. Move cards to play area
         this.playArea.innerHTML = '';
+        const playedCardsEls = [];
+
         result.cards.forEach(card => {
             const el = this.createCardEl(card);
-            el.classList.add('played'); // Animation class
+            // Assign ID for lookup
+            el.dataset.cardId = card.id;
+            // Initially just visible
             this.playArea.appendChild(el);
+            playedCardsEls.push(el);
         });
 
-        // Animate numbers
-        let currentChips = 0;
-        let currentMult = 0;
-        const targetChips = result.score.chips;
-        const targetMult = result.score.mult;
+        // Use breakdown for sequential animation
+        // breakdown is array of { source: 'card'|'joker', card?, joker?, chips, mult }
+        // We want to animate step by step
 
-        // Simple interval for now
-        this.elChips.innerText = targetChips;
-        this.elMult.innerText = targetMult;
-        this.elScore.innerText = this.game.currentScore; // Final total updated
+        const delay = ms => new Promise(res => setTimeout(res, ms));
 
-        // Clear play area after delay
-        setTimeout(() => {
-            this.playArea.innerHTML = '';
-        }, 1500);
+        // Reset display
+        let displayedChips = 0;
+        let displayedMult = 0;
+        this.elChips.innerText = '0';
+        this.elMult.innerText = '0';
+        this.elScore.innerText = this.game.currentScore - result.score.total; // Start from previous total?
+
+        const breakdown = result.score.breakdown || [];
+
+        for (const step of breakdown) {
+            await delay(400); // Pace of animation
+
+            if (step.source === 'card') {
+                // Find card element
+                const cardEl = playedCardsEls.find(el => parseInt(el.dataset.cardId) === step.card.id);
+                if (cardEl) {
+                    cardEl.classList.add('trigger-flash');
+                    setTimeout(() => cardEl.classList.remove('trigger-flash'), 300);
+
+                    // Show floating text
+                    this.showFloatingText(cardEl, `+${step.chips}`);
+                }
+            } else if (step.source === 'joker') {
+                // Find Joker Element
+                const jokers = this.jokersArea.children;
+                const jokerIndex = this.game.jokerManager.jokers.findIndex(j => j.id === step.joker.id);
+                if (jokerIndex >= 0 && jokers[jokerIndex]) {
+                     const el = jokers[jokerIndex];
+                     el.classList.add('trigger-shake');
+                     setTimeout(() => el.classList.remove('trigger-shake'), 400);
+                }
+            }
+
+            // Update Stats
+            this.elChips.innerText = step.chips; // Should we tween this?
+            this.elMult.innerText = step.mult;
+            displayedChips = step.chips;
+            displayedMult = step.mult;
+        }
+
+        await delay(500);
+
+        // Final Total Animation
+        const finalScore = result.score.total;
+        this.elScore.innerText = this.game.currentScore; // Update to actual final
+
+        // Flame effect or something?
+        this.elScore.classList.add('score-pop');
+        setTimeout(() => this.elScore.classList.remove('score-pop'), 500);
+
+        await delay(1000);
+
+        // Clear play area
+        this.playArea.innerHTML = '';
+
+        // Check Game Over logic handled by core calling endRound or not.
+        // Core updates state immediately, we just visualized it.
+    }
+
+    showFloatingText(targetEl, text) {
+        const rect = targetEl.getBoundingClientRect();
+        const floatEl = document.createElement('div');
+        floatEl.innerText = text;
+        floatEl.className = 'floating-score';
+        floatEl.style.left = (rect.left + rect.width/2) + 'px';
+        floatEl.style.top = rect.top + 'px';
+        document.body.appendChild(floatEl);
+
+        setTimeout(() => floatEl.remove(), 1000);
     }
 
     handleRoundEnd(win) {

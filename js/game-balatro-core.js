@@ -37,55 +37,102 @@
             return false;
         }
 
-        calculateScore(handStats) {
+        calculateScore(handStats, verbose = false) {
             // HandStats: { type, baseChips, baseMult, scoringCards, playedCards }
 
             let chips = handStats.baseChips;
             let mult = handStats.baseMult;
+            let breakdown = []; // Event log for animation
 
-            // 1. Add Card Chips
+            // 1. Card Scoring (Chips)
             for (const c of handStats.scoringCards) {
-                chips += c.value + (c.chipBonus || 0);
-            }
+                const cardChips = c.value + (c.chipBonus || 0);
+                chips += cardChips;
 
-            // 2. Joker Logic
-            for (const joker of this.jokers) {
-                // Check Conditions
-                let active = true;
-                if (joker.condition) {
-                    if (joker.condition === 'suit_heart') {
-                        // Count hearts in played cards (or scoring? Balatro says "played")
-                        // Usually trigger per card. But here we might just simplify.
-                        // Let's implement specific logic per joker type.
-                    } else if (joker.condition === 'hand_Pair') {
-                        if (handStats.type !== 'Pair') active = false;
-                    }
+                if (verbose) {
+                    breakdown.push({
+                        source: 'card',
+                        card: c,
+                        chips: cardChips,
+                        mult: 0,
+                        totalChips: chips,
+                        totalMult: mult
+                    });
                 }
 
-                if (!active) continue;
+                // Joker Card Triggers (e.g., +Mult per Heart played)
+                this.jokers.forEach(joker => {
+                    if (joker.trigger === 'card_score') {
+                         if (joker.effect({ chips, mult }, c)) {
+                             // Effect applied internally to stats object passed in?
+                             // Wait, we need to handle stats updates.
+                             // Redefine effect to return delta or modify object.
+                             // Let's pass a proxy object or just current values.
+                             // Actually, let's just re-implement logic here or trust data.js
 
-                // Apply Effects
-                if (joker.type === 'mult_add') {
-                    mult += joker.value;
-                } else if (joker.type === 'chips_add') {
-                    chips += joker.value;
-                } else if (joker.type === 'mult_mult') {
-                    mult *= joker.value;
-                } else if (joker.type === 'conditional_mult') {
-                    if (joker.condition === 'suit_heart') {
-                        const hearts = handStats.playedCards.filter(c => c.suit === 'Hearts').length;
-                        mult += hearts * joker.value;
+                             // Re-evaluating approach: data.js defines effect(stats, card)
+                             // where stats = { chips, mult }
+                             const statsObj = { chips, mult };
+                             if (joker.effect(statsObj, c)) {
+                                 chips = statsObj.chips;
+                                 mult = statsObj.mult;
+                                 if (verbose) {
+                                     breakdown.push({
+                                         source: 'joker',
+                                         joker: joker,
+                                         chips: chips,
+                                         mult: mult
+                                     });
+                                 }
+                             }
+                         }
                     }
-                } else if (joker.type === 'conditional_chips') {
-                     // Condition checked above
-                     chips += joker.value;
-                }
+                });
             }
+
+            // 2. Hand Evaluation Triggers (e.g. "If Pair")
+            this.jokers.forEach(joker => {
+                if (joker.trigger === 'hand_eval') {
+                    const statsObj = { chips, mult, type: handStats.type };
+                    if (joker.effect(statsObj)) {
+                        chips = statsObj.chips;
+                        mult = statsObj.mult;
+                        if (verbose) {
+                            breakdown.push({
+                                source: 'joker',
+                                joker: joker,
+                                chips: chips,
+                                mult: mult
+                            });
+                        }
+                    }
+                }
+            });
+
+            // 3. Passive / End Calculation Triggers (+Mult, X Mult)
+            this.jokers.forEach(joker => {
+                if (joker.trigger === 'passive') {
+                    const statsObj = { chips, mult };
+                    if (joker.effect(statsObj)) {
+                        chips = statsObj.chips;
+                        mult = statsObj.mult;
+                        if (verbose) {
+                            breakdown.push({
+                                source: 'joker',
+                                joker: joker,
+                                chips: chips,
+                                mult: mult
+                            });
+                        }
+                    }
+                }
+            });
 
             return {
                 chips: Math.floor(chips),
                 mult: Math.floor(mult),
-                total: Math.floor(chips * mult)
+                total: Math.floor(chips * mult),
+                breakdown: breakdown
             };
         }
     }
@@ -186,7 +233,8 @@
             stats.level = levelInfo.level;
 
             // Calculate Score (Jokers etc)
-            const scoreResult = this.jokerManager.calculateScore(stats);
+            // Pass verbose=false to just get numbers
+            const scoreResult = this.jokerManager.calculateScore(stats, false);
 
             return {
                 handType: stats.type,
@@ -216,8 +264,16 @@
             // Remove from hand
             this.hand = this.hand.filter(c => !c.selected);
 
-            const scoreResult = this.jokerManager.calculateScore(stats);
+            // Calculate Score with breakdown for animation
+            const scoreResult = this.jokerManager.calculateScore(stats, true);
 
+            // We update score AFTER animation in view, but core state needs to be consistent.
+            // But wait, if we update score here, view will jump.
+            // Actually, we should probably update score immediately in state,
+            // but view will animate from old score to new score?
+            // Balatro adds points incrementally.
+            // Let's store Pending Score or handle it.
+            // For now, update total but view handles incremental display.
             this.currentScore += scoreResult.total;
             this.handsLeft--;
 
