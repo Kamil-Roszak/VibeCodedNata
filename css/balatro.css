@@ -1,642 +1,511 @@
 /* Balatro (Nata Poker) Styling */
 
-.balatro-container {
+:root {
+    --b-red: #ff4d4d;
+    --b-blue: #0099ff;
+    --b-gold: #ffcc00;
+    --b-orange: #ff9933;
+    --b-dark: #1a1a1a;
+    --b-panel-bg: #2d2d2d;
+    --b-border: #444;
+    --b-text: #fff;
+    --b-shadow: rgba(0,0,0,0.5);
+    --b-crt-line: rgba(18, 16, 16, 0.1);
+}
+
+/* CRT Effect Overlay */
+.balatro-game-container {
     width: 100%;
-    height: 100%;
+    height: 100vh; /* Full viewport height for game feel */
+    display: flex;
+    flex-direction: column;
+    background-color: #111;
+    background-image:
+        linear-gradient(rgba(18, 16, 16, 0) 50%, rgba(0, 0, 0, 0.25) 50%),
+        linear-gradient(90deg, rgba(255, 0, 0, 0.06), rgba(0, 255, 0, 0.02), rgba(0, 0, 255, 0.06));
+    background-size: 100% 2px, 3px 100%;
+    font-family: 'Courier New', monospace;
+    color: white;
+    box-sizing: border-box;
+    padding: 10px;
+    overflow: hidden;
+    position: relative;
+    border: 10px solid #222;
+    border-radius: 20px;
+    box-shadow: inset 0 0 100px rgba(0,0,0,0.9);
+}
+
+.balatro-game-container::before {
+    content: " ";
+    display: block;
+    position: absolute;
+    top: 0;
+    left: 0;
+    bottom: 0;
+    right: 0;
+    background: radial-gradient(circle, rgba(18, 16, 16, 0) 50%, rgba(0, 0, 0, 0.4) 100%);
+    pointer-events: none;
+    z-index: 100;
+}
+
+/* Layout */
+.balatro-top-bar {
+    height: 140px;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    gap: 20px;
+    margin-bottom: 10px;
+    z-index: 10;
+}
+
+.balatro-main-area {
+    display: flex;
+    flex: 1;
+    gap: 15px;
+    z-index: 10;
+    overflow: visible;
+}
+
+.balatro-hud-column {
+    width: 250px;
+    display: flex;
+    flex-direction: column;
+    gap: 10px;
+    padding: 5px;
+}
+
+.balatro-board-column {
+    flex: 1;
     display: flex;
     flex-direction: column;
     justify-content: space-between;
+    background: rgba(255, 255, 255, 0.05);
+    border-radius: 15px;
     padding: 20px;
-    box-sizing: border-box;
-    max-width: 1200px;
-    margin: 0 auto;
-    /* Background for the board */
-    background: rgba(0, 50, 0, 0.3);
-    border-radius: 20px;
-    margin-top: 50px; /* Header space */
-    overflow: visible; /* Allow floating elements/badges to be seen */
     position: relative;
 }
 
-/* Top: Jokers */
-.balatro-top-bar {
-    display: flex;
-    justify-content: space-between;
-    height: 120px;
-    flex-shrink: 0; /* Don't shrink top bar too much */
-}
-
+/* Joker & Consumable Slots */
 .joker-slots {
     display: flex;
     gap: 10px;
-    background: rgba(0,0,0,0.2);
+    background: rgba(0,0,0,0.3);
     padding: 10px;
     border-radius: 10px;
-    flex-grow: 1;
-    margin-right: 20px;
-    align-items: center;
-    overflow-x: auto; /* Scroll if too many jokers */
+    border: 2px solid #444;
+    min-width: 300px;
+    justify-content: center;
 }
 
 .consumable-slots {
     display: flex;
     gap: 10px;
-    background: rgba(0,0,0,0.2);
+    background: rgba(0,0,0,0.3);
     padding: 10px;
     border-radius: 10px;
-    flex-grow: 0;
-    margin-right: 20px;
-    align-items: center;
+    border: 2px solid #444;
 }
 
 .joker-card {
-    width: 80px;
-    height: 110px;
-    background: white;
-    border-radius: 8px;
-    border: 3px solid var(--nata-gold);
-    box-shadow: 0 4px 0 rgba(0,0,0,0.2);
+    width: 70px;
+    height: 95px;
+    background: #eee;
+    border: 4px solid var(--b-gold);
+    border-radius: 5px;
     display: flex;
     flex-direction: column;
     align-items: center;
     justify-content: center;
-    padding: 5px;
-    text-align: center;
     font-size: 10px;
-    flex-shrink: 0;
+    color: black;
+    font-weight: bold;
+    text-align: center;
+    transition: transform 0.2s;
+    cursor: pointer;
 }
 
 .consumable-card {
-    border-color: #aa55ff; /* Purple for consumables */
-}
-
-.joker-card.empty {
-    background: rgba(0,0,0,0.1);
-    border: 2px dashed rgba(255,255,255,0.3);
-    color: rgba(255,255,255,0.5);
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    box-shadow: none;
+    border-color: #aa55ff;
 }
 
 .joker-card img {
     width: 40px;
-    height: 60px;
+    height: 50px;
     object-fit: contain;
-    margin-bottom: 5px;
 }
 
-.joker-card:hover {
-    transform: scale(1.1);
-    z-index: 10;
-    box-shadow: 0 0 15px var(--nata-gold);
+.joker-card.empty {
+    background: rgba(255,255,255,0.1);
+    border: 2px dashed rgba(255,255,255,0.3);
+    color: rgba(255,255,255,0.3);
 }
 
-.joker-card.trigger-shake {
-    animation: joker-shake 0.4s ease-in-out;
-    box-shadow: 0 0 20px white;
-}
-
-@keyframes joker-shake {
-    0%, 100% { transform: rotate(0deg); }
-    25% { transform: rotate(-10deg) scale(1.2); }
-    75% { transform: rotate(10deg) scale(1.2); }
-}
-
-.round-info {
-    display: flex;
-    flex-direction: column;
-    gap: 10px;
-    width: 150px;
-    flex-shrink: 0;
-}
-
-.info-box {
-    background: var(--nata-red);
-    color: white;
-    padding: 10px;
+/* HUD Panels */
+.hud-panel {
+    background: var(--b-panel-bg);
+    border: 3px solid var(--b-border);
     border-radius: 10px;
-    display: flex;
-    justify-content: space-between;
-    font-weight: bold;
-    box-shadow: 0 4px 0 var(--nata-red-dark);
-}
-
-/* Middle: Score */
-.balatro-score-area {
+    padding: 10px;
     display: flex;
     flex-direction: column;
     align-items: center;
     justify-content: center;
-    flex-grow: 1; /* Take remaining space */
-    min-height: 100px; /* Ensure visibility */
+    box-shadow: 3px 3px 0 rgba(0,0,0,0.5);
+    position: relative;
 }
 
-.hand-preview-box {
-    background: #333;
-    padding: 10px 20px;
-    border-radius: 15px;
-    border: 3px solid #555;
-    text-align: center;
-    margin-bottom: 20px;
-    box-shadow: 0 5px 15px rgba(0,0,0,0.3);
-    min-width: 200px;
+.hud-label {
+    font-size: 12px;
+    color: #aaa;
+    text-transform: uppercase;
+    margin-bottom: 5px;
+    font-weight: bold;
 }
 
-.hand-preview-box.hidden {
-    display: none;
-}
-
-.hand-name {
-    color: white;
+.hud-value {
     font-size: 24px;
     font-weight: bold;
-    margin-bottom: 5px;
+    color: white;
 }
 
-.hand-level {
-    color: #88ccff;
-    font-size: 14px;
-    margin-bottom: 5px;
-}
-
-.hand-score {
-    background: #111;
-    padding: 5px 10px;
-    border-radius: 8px;
-    display: inline-flex;
-    gap: 10px;
-    align-items: center;
-    font-size: 20px;
-    font-weight: bold;
-}
-
-.score-display {
-    background: #222;
-    padding: 20px 40px;
-    border-radius: 20px;
-    border: 4px solid #444;
-    text-align: center;
-    box-shadow: 0 10px 20px rgba(0,0,0,0.5);
-    margin-bottom: 20px;
-}
-
-.score-row {
+.hud-value-large {
     font-size: 32px;
     font-weight: bold;
+    color: white;
+    text-shadow: 2px 2px 0 black;
+}
+
+.panel-score-target {
+    background: #331111;
+    border-color: #aa3333;
+}
+.panel-score-target .hud-value-large {
+    color: var(--b-red);
+}
+
+.panel-current-score {
+    background: #111;
+    border: 4px solid white;
+    padding: 15px;
+    min-height: 100px;
+}
+
+.score-display-mini {
     display: flex;
     align-items: center;
+    gap: 5px;
+    font-size: 18px;
+    margin-bottom: 5px;
+}
+
+.score-chips { color: var(--b-blue); text-shadow: 0 0 5px var(--b-blue); font-weight: bold;}
+.score-mult { color: var(--b-red); text-shadow: 0 0 5px var(--b-red); font-weight: bold;}
+.score-total-large { font-size: 40px; color: white; text-shadow: 0 0 10px white; }
+
+.hud-row {
+    display: flex;
     gap: 10px;
 }
-
-.score-chips { color: #55aaff; text-shadow: 0 0 10px #004D9D; }
-.score-mult { color: #ff5555; text-shadow: 0 0 10px #E30613; }
-.x { color: white; font-size: 20px; }
-
-.score-total {
-    color: white;
-    font-size: 48px;
-    font-weight: bold;
-    margin-top: 10px;
-    transition: transform 0.2s;
+.hud-row .hud-panel {
+    flex: 1;
 }
 
-.score-pop {
-    animation: score-pop-anim 0.5s ease-out;
-    color: #ffff55;
-    text-shadow: 0 0 20px orange;
-}
+.panel-blue { background: #003366; border-color: var(--b-blue); }
+.panel-red { background: #661111; border-color: var(--b-red); }
+.panel-gold { background: #664400; border-color: var(--b-gold); }
+.panel-ante { background: #663300; border-color: var(--b-orange); }
 
-@keyframes score-pop-anim {
-    0% { transform: scale(1); }
-    50% { transform: scale(1.5); }
-    100% { transform: scale(1); }
-}
-
-.target-display {
-    color: white;
-    font-size: 24px;
-    background: rgba(0,0,0,0.5);
-    padding: 5px 20px;
-    border-radius: 20px;
-}
-
-/* Bottom: Cards */
-.balatro-play-area {
-    display: flex;
-    flex-direction: column;
-    gap: 20px;
-    align-items: center;
-    position: relative;
-    flex-shrink: 0; /* Keep play area size stable */
-    padding-bottom: 20px;
-}
-
-.action-row {
-    display: flex;
+/* Hand Preview */
+.hand-preview-mini {
+    background: #222;
+    padding: 5px;
+    border-radius: 5px;
+    font-size: 10px;
+    text-align: center;
+    border: 1px solid #555;
+    margin-bottom: 10px;
     width: 100%;
-    justify-content: space-between;
-    align-items: center;
 }
+.hand-preview-mini.hidden { display: none; }
+.hand-name { font-size: 14px; font-weight: bold; color: var(--b-gold); }
 
-/* Deck Pile */
-.deck-pile {
-    width: 80px;
-    height: 120px;
-    background: linear-gradient(135deg, #004D9D, #003366);
-    border-radius: 8px;
-    border: 2px solid white;
-    box-shadow: 2px 2px 0 #222;
+/* Play Area (Board) */
+.play-slots-area {
+    flex: 1;
     display: flex;
-    align-items: center;
     justify-content: center;
-    color: white;
-    font-weight: bold;
-    cursor: help;
-    margin-left: 20px;
-    flex-shrink: 0;
-}
-
-.card-row {
-    display: flex;
+    align-items: center;
     gap: 10px;
-    justify-content: center;
-    min-height: 140px;
     perspective: 1000px;
-    width: 100%;
 }
 
-.play-slots {
-    height: 140px; /* Fixed height for played cards */
+.hand-controls-row {
+    display: flex;
+    justify-content: space-between;
+    align-items: flex-end;
+    margin-top: 20px;
 }
 
+.hand-cards-area {
+    flex: 1;
+    display: flex;
+    justify-content: center;
+    align-items: flex-end;
+    margin: 0 10px;
+}
+
+.hand-cards-area .poker-card {
+    margin-left: -20px; /* Overlap cards */
+    transition: margin 0.2s, transform 0.2s;
+}
+
+.hand-cards-area .poker-card:first-child {
+    margin-left: 0;
+}
+
+.hand-cards-area .poker-card:hover {
+    margin-right: 20px; /* Push neighbors away slightly */
+    z-index: 50;
+}
+
+/* Cards */
 .poker-card {
     width: 90px;
-    height: 130px;
+    height: 125px;
     background: white;
     border-radius: 8px;
-    box-shadow: 0 2px 5px rgba(0,0,0,0.2);
+    border: 2px solid #ddd;
+    box-shadow: 2px 2px 5px rgba(0,0,0,0.3);
     display: flex;
     flex-direction: column;
     justify-content: space-between;
     padding: 5px;
+    font-size: 20px;
     font-weight: bold;
-    font-size: 24px;
-    cursor: pointer;
-    transition: transform 0.2s, box-shadow 0.2s;
     user-select: none;
+    cursor: pointer;
+    transition: transform 0.1s, margin 0.1s;
     position: relative;
-    border: 1px solid #ddd;
-    flex-shrink: 0;
+    color: black;
 }
 
 .poker-card:hover {
-    transform: translateY(-10px);
-    z-index: 10;
-}
-
-.poker-card.selected {
     transform: translateY(-20px);
-    box-shadow: 0 0 10px var(--nata-gold);
-    border: 2px solid var(--nata-gold);
+    z-index: 20;
+}
+.poker-card.selected {
+    transform: translateY(-30px);
+    border: 3px solid var(--b-orange);
+    box-shadow: 0 0 15px var(--b-orange);
+    z-index: 15;
 }
 
-.poker-card.played {
-    /* No exit animation yet, they stay for scoring */
-}
-
-.poker-card.debuffed {
-    filter: grayscale(1) opacity(0.5);
-    background: #ccc;
-    cursor: not-allowed;
-    border: 2px dashed #666;
-}
-
-/* Enhanced Cards */
-.poker-card.enhanced-mult {
-    box-shadow: 0 0 10px #ff5555;
-    border: 2px solid #ff5555;
-}
-.poker-card.enhanced-mult::after {
-    content: '+4 Mult';
-    position: absolute;
-    bottom: -18px;
-    left: 0;
-    width: 100%;
-    font-size: 9px;
-    background: #ff5555;
-    color: white;
-    border-radius: 4px;
-    padding: 1px 0;
-    z-index: 5;
-}
-
-.poker-card.enhanced-bonus {
-    box-shadow: 0 0 10px #55aaff;
-    border: 2px solid #55aaff;
-}
-.poker-card.enhanced-bonus::after {
-    content: '+20 Chips';
-    position: absolute;
-    bottom: -18px;
-    left: 0;
-    width: 100%;
-    font-size: 9px;
-    background: #55aaff;
-    color: white;
-    border-radius: 4px;
-    padding: 1px 0;
-    z-index: 5;
-}
-
-.poker-card.trigger-flash {
-    animation: card-flash 0.3s ease-in-out;
-}
-
-@keyframes card-flash {
-    0% { transform: scale(1); filter: brightness(1); }
-    50% { transform: scale(1.2); filter: brightness(2); background: #ffffdd; }
-    100% { transform: scale(1); filter: brightness(1); }
-}
-
-/* Floating Text */
-.floating-score {
-    position: fixed;
-    color: var(--nata-red);
-    font-weight: bold;
-    font-size: 24px;
-    text-shadow: 2px 2px 0 white;
-    pointer-events: none;
-    animation: float-up 1s forwards;
-    z-index: 1000;
-}
-
-@keyframes float-up {
-    0% { transform: translateY(0) scale(1); opacity: 1; }
-    100% { transform: translateY(-50px) scale(1.5); opacity: 0; }
-}
-
-/* Card Ranks/Suits */
-.suit-hearts, .suit-diamonds { color: var(--nata-red); }
-.suit-spades, .suit-clubs { color: black; }
+.suit-hearts, .suit-diamonds { color: #d00; }
+.suit-spades, .suit-clubs { color: #111; }
 
 .card-center {
+    font-size: 40px;
     position: absolute;
     top: 50%;
     left: 50%;
     transform: translate(-50%, -50%);
-    font-size: 40px;
 }
 
-/* Shop Layout Redesign */
-.shop-layout {
-    display: flex;
-    gap: 30px;
-    align-items: flex-start;
-    padding: 10px 0;
-    text-align: left;
-}
-
-.shop-column {
-    display: flex;
-    flex-direction: column;
-    gap: 20px;
-}
-
-.shop-col-left {
-    flex: 0 0 150px;
-    align-items: center;
-    border-right: 2px solid #eee;
-    padding-right: 20px;
-}
-
-.shop-col-main {
-    flex: 1;
-}
-
-.shop-row {
-    display: flex;
-    gap: 15px;
-    flex-wrap: wrap;
-    margin-bottom: 10px;
-}
-
-.shop-section-title {
+.card-corner {
+    position: absolute;
     font-size: 16px;
-    color: #666;
-    margin: 0 0 10px 0;
-    text-transform: uppercase;
-    font-weight: bold;
-    border-bottom: 2px solid var(--nata-gold);
-    display: inline-block;
+    line-height: 1;
 }
 
-.shop-item {
-    background: #f9f9f9;
-    padding: 10px;
-    border-radius: 10px;
-    border: 2px solid #eee;
-    text-align: center;
-    cursor: pointer;
-    transition: all 0.2s;
-    width: 100px;
-    height: 140px;
+.card-corner.top-left {
+    top: 5px;
+    left: 5px;
+}
+
+.card-corner.bottom-right {
+    bottom: 5px;
+    right: 5px;
+    transform: rotate(180deg);
+}
+
+.poker-card.enhanced-mult { border: 3px solid var(--b-red); box-shadow: 0 0 5px var(--b-red); }
+.poker-card.enhanced-bonus { border: 3px solid var(--b-blue); box-shadow: 0 0 5px var(--b-blue); }
+
+/* Controls */
+.controls-area {
     display: flex;
     flex-direction: column;
-    justify-content: space-between;
+    gap: 10px;
     align-items: center;
-    position: relative;
+    width: 140px;
 }
 
-.shop-item:hover {
-    border-color: var(--nata-blue);
-    transform: translateY(-5px);
-    box-shadow: 0 5px 15px rgba(0,0,0,0.1);
-}
-
-.shop-item.voucher-item {
-    background: #eef;
-    border-color: #aa88ff;
-    width: 120px;
-    height: 160px;
-}
-
-.shop-item img {
-    width: 50px;
-    height: 60px;
-    object-fit: contain;
-}
-
-.shop-item h4 { margin: 5px 0; font-size: 12px; line-height: 1.2; }
-.shop-item p { font-size: 10px; color: #666; display: none; /* Hide desc in card, show on hover/tooltip? */ }
-/* Custom tooltip logic or just basic title attribute handling */
-
-.shop-item .price {
-    color: white;
+.deck-area {
+    width: 80px;
+    height: 110px;
+    background: linear-gradient(135deg, var(--b-blue), #003366);
+    border: 3px solid white;
+    border-radius: 8px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
     font-weight: bold;
-    background: var(--nata-red);
-    padding: 2px 8px;
-    border-radius: 10px;
-    display: inline-block;
+    box-shadow: 3px 3px 0 #111;
+}
+
+.deck-pile {
+    text-align: center;
     font-size: 12px;
 }
 
-.control-panel {
+.action-buttons-col {
     display: flex;
-    gap: 10px;
+    flex-direction: column;
+    gap: 5px;
+    width: 100%;
 }
 
-/* Shop Overlay Override */
-#b-shop-overlay {
-    width: 90% !important;
-    max-width: 1000px !important;
-    padding: 20px;
+.sort-buttons-col {
+    display: flex;
+    gap: 5px;
+    justify-content: center;
+}
+
+.btn-play {
+    background: var(--b-blue);
+    border: 3px solid white;
+    font-size: 16px;
+    padding: 10px;
+    color: white;
+    text-shadow: 1px 1px 0 black;
+    box-shadow: 0 4px 0 #004488;
+}
+.btn-play:active { transform: translateY(4px); box-shadow: none; }
+
+.btn-discard {
+    background: var(--b-red);
+    border: 3px solid white;
+    font-size: 14px;
+    padding: 5px;
+    color: white;
+    box-shadow: 0 4px 0 #880000;
+}
+.btn-discard:active { transform: translateY(4px); box-shadow: none; }
+
+.btn-sort {
+    background: var(--b-gold);
+    border: 2px solid white;
+    color: black;
+    font-weight: bold;
+    font-size: 10px;
+    padding: 4px;
+    cursor: pointer;
+}
+
+.btn-reroll {
+    font-size: 12px;
+    padding: 5px;
+}
+
+/* Animations */
+.trigger-flash { animation: card-flash 0.3s; }
+@keyframes card-flash {
+    0% { filter: brightness(1); transform: scale(1); }
+    50% { filter: brightness(2); transform: scale(1.1); background: #ffffaa; }
+    100% { filter: brightness(1); transform: scale(1); }
+}
+
+.floating-score {
+    position: fixed;
+    color: var(--b-red);
+    font-size: 24px;
+    font-weight: bold;
+    text-shadow: 2px 2px 0 black;
+    pointer-events: none;
+    z-index: 1000;
+    animation: float-up 1s forwards;
+}
+
+@keyframes float-up {
+    0% { transform: translateY(0); opacity: 1; }
+    100% { transform: translateY(-50px); opacity: 0; }
+}
+
+.score-pop { animation: score-pop-anim 0.3s; }
+@keyframes score-pop-anim {
+    50% { transform: scale(1.3); filter: brightness(1.5); }
+}
+
+/* Shop and Mobile adjustments */
+.shop-layout {
+    display: flex;
+    gap: 20px;
+    align-items: flex-start;
+}
+.shop-column { display: flex; flex-direction: column; gap: 15px; }
+.shop-section-title {
+    font-size: 14px;
+    color: #888;
+    text-transform: uppercase;
+    font-weight: bold;
+    border-bottom: 2px solid #444;
+    padding-bottom: 5px;
+}
+.shop-item {
+    width: 100px; height: 140px; background: #fff;
+    border: 4px solid var(--b-border); border-radius: 10px;
+    display: flex; flex-direction: column; align-items: center; justify-content: center;
+    cursor: pointer; position: relative;
+    color: black;
+}
+.shop-item:hover { border-color: var(--b-gold); transform: scale(1.05); }
+.shop-item .price {
+    position: absolute; top: -10px; right: -10px;
+    background: var(--b-red); color: white; padding: 2px 6px;
+    border-radius: 5px; font-weight: bold;
 }
 
 /* Mobile Responsive */
-@media (max-width: 768px) {
-    .balatro-container {
-        padding: 5px;
-        margin-top: 50px;
-        overflow-y: auto; /* Allow vertical scroll if needed */
-        display: block; /* Stack blocks instead of flex column forcing fit */
-    }
-
-    /* Top Bar Scaling */
-    .balatro-top-bar {
+@media (max-width: 900px) {
+    .balatro-game-container {
         height: auto;
-        flex-wrap: wrap;
-        margin-bottom: 10px;
+        overflow-y: auto;
     }
-
-    .joker-slots {
-        margin-right: 0;
-        width: 100%;
-        margin-bottom: 5px;
-        padding: 5px;
+    .balatro-main-area {
+        flex-direction: column;
     }
-
-    .consumable-slots {
-        width: 100%;
-        margin-right: 0;
-        margin-bottom: 5px;
-        justify-content: center;
-    }
-
-    .joker-card {
-        width: 50px;
-        height: 70px;
-        font-size: 8px;
-    }
-
-    .joker-card img {
-        width: 25px;
-        height: 40px;
-    }
-
-    .round-info {
+    .balatro-hud-column {
         width: 100%;
         flex-direction: row;
-        justify-content: space-between;
-    }
-
-    .info-box {
-        padding: 5px 10px;
-        font-size: 12px;
-        flex-grow: 1;
-        margin: 0 2px;
-    }
-
-    /* Score Scaling */
-    .score-display {
-        padding: 10px;
-        margin-bottom: 10px;
-    }
-
-    .score-row { font-size: 20px; }
-    .score-total { font-size: 32px; }
-    .target-display { font-size: 16px; }
-
-    /* Play Area Scaling */
-    .balatro-play-area {
-        gap: 10px;
-    }
-
-    .play-slots {
-        height: 100px;
-        min-height: 100px;
-    }
-
-    .card-row {
-        gap: 0; /* Overlap handled by margin */
-        min-height: 100px;
-        flex-wrap: nowrap;
-        overflow-x: visible; /* Let them stick out if needed, usually overlap handles it */
-    }
-
-    .poker-card {
-        width: 60px;
-        height: 90px;
-        font-size: 16px;
-        margin-right: -15px; /* Negative margin for overlap */
-    }
-
-    .poker-card:last-child {
-        margin-right: 0;
-    }
-
-    .card-center {
-        font-size: 24px;
-    }
-
-    /* Deck Pile */
-    .deck-pile {
-        width: 50px;
-        height: 80px;
-        font-size: 10px;
-        margin-left: 5px;
-    }
-
-    /* Action Buttons */
-    .action-row {
         flex-wrap: wrap;
-        justify-content: center;
-        gap: 5px;
     }
-
-    .action-buttons button {
-        padding: 8px 15px;
-        font-size: 12px;
+    .hud-panel {
+        flex: 1 1 100px;
     }
-
-    .control-panel button {
-        padding: 5px 10px;
-        font-size: 10px;
+    .panel-current-score {
+        min-height: auto;
+        order: -1;
+        width: 100%;
+        flex: 1 1 100%;
     }
-
-    /* Hand Area specific */
-    .hand-area {
-        padding-bottom: 50px; /* Space for scroll */
+    .play-slots-area {
+        min-height: 120px;
+    }
+    .hand-controls-row {
+        flex-direction: column;
+        align-items: center;
+    }
+    .controls-area {
+        flex-direction: row;
+        width: 100%;
+        justify-content: space-around;
         margin-top: 10px;
     }
-
-    /* Shop Mobile */
-    .shop-layout {
-        flex-direction: column;
-        gap: 10px;
+    .deck-area { display: none; } /* Hide deck on mobile to save space */
+    .poker-card {
+        width: 60px; height: 90px;
+        font-size: 14px;
     }
-
-    .shop-col-left {
-        width: 100%;
-        border-right: none;
-        border-bottom: 2px solid #eee;
-        padding-bottom: 10px;
-        flex-direction: row;
-        justify-content: space-around;
-    }
-
-    .shop-row {
-        justify-content: center;
-    }
+    .card-center { font-size: 24px; }
 }
