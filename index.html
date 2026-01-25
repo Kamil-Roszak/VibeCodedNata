@@ -98,57 +98,63 @@
 
                     <!-- Center/Right Board -->
                     <div class="balatro-board-column">
-                        <div id="b-play-slots" class="play-slots-area"></div>
 
-                        <div class="hand-controls-row">
-                            <div id="b-hand-area" class="hand-cards-area"></div>
+                        <!-- VIEW: GAMEPLAY -->
+                        <div id="b-view-gameplay" class="b-view-layer active">
+                            <div id="b-play-slots" class="play-slots-area"></div>
 
-                            <div class="controls-area">
-                                <div id="b-deck-area" class="deck-area"></div>
-                                <div class="action-buttons-col">
-                                    <button id="b-play-btn" class="nata-btn nata-btn-primary btn-play">PLAY</button>
-                                    <button id="b-discard-btn" class="nata-btn nata-btn-red btn-discard">DISCARD</button>
-                                </div>
-                                <div class="sort-buttons-col">
-                                    <button id="b-sort-rank" class="btn-sort">Rank</button>
-                                    <button id="b-sort-suit" class="btn-sort">Suit</button>
+                            <div class="hand-controls-row">
+                                <div id="b-hand-area" class="hand-cards-area"></div>
+
+                                <div class="controls-area">
+                                    <div id="b-deck-area" class="deck-area"></div>
+                                    <div class="action-buttons-col">
+                                        <button id="b-play-btn" class="nata-btn nata-btn-primary btn-play">PLAY</button>
+                                        <button id="b-discard-btn" class="nata-btn nata-btn-red btn-discard">DISCARD</button>
+                                    </div>
+                                    <div class="sort-buttons-col">
+                                        <button id="b-sort-rank" class="btn-sort">Rank</button>
+                                        <button id="b-sort-suit" class="btn-sort">Suit</button>
+                                    </div>
                                 </div>
                             </div>
                         </div>
+
+                        <!-- VIEW: SHOP -->
+                        <div id="b-view-shop" class="b-view-layer hidden">
+                             <!-- Header handled by JS or static? Static layout, content dynamic -->
+                             <div class="b-view-header">
+                                 <h2>Nata Shop</h2>
+                                 <div class="shop-stats">Money: <span id="b-shop-money" class="money-text">$0</span></div>
+                                 <button id="b-next-round-btn" class="nata-btn nata-btn-primary">NEXT ROUND</button>
+                             </div>
+                             <div id="b-shop-content" class="b-shop-grid">
+                                 <!-- Populated by JS -->
+                             </div>
+                        </div>
+
+                        <!-- VIEW: BLIND SELECT -->
+                        <div id="b-view-blind" class="b-view-layer hidden">
+                             <div class="b-view-header">
+                                 <h2>Select Blind</h2>
+                             </div>
+                             <div id="b-blind-content" class="b-blind-grid">
+                                 <!-- Columns for Small/Big/Boss -->
+                                 <div id="b-blind-col-small" class="blind-col"></div>
+                                 <div id="b-blind-col-big" class="blind-col"></div>
+                                 <div id="b-blind-col-boss" class="blind-col"></div>
+                             </div>
+                        </div>
+
                     </div>
                 </div>
 
-                <!-- Shop Overlay -->
-                <div id="b-shop-overlay" class="nata-overlay" style="width: 90%; max-width: 900px;">
-                    <h1>Nata Shop</h1>
-                    <p>Money: <span id="b-shop-money">$0</span></p>
-                    <div id="b-shop-items" class="shop-items-grid"></div>
-                    <button id="b-next-round-btn" class="nata-btn nata-btn-primary">NEXT ROUND</button>
-                </div>
-
-                <!-- Game Over Overlay -->
+                <!-- Game Over Overlay (Still an Overlay) -->
                 <div id="b-game-over" class="nata-overlay">
                     <h1>Game Over</h1>
                     <p>Round Reached: <span id="b-final-round">1</span></p>
                     <button onclick="startBalatro()" class="nata-btn nata-btn-primary">TRY AGAIN</button>
                     <button data-nav="menu-view" class="nata-btn nata-btn-secondary">MENU</button>
-                </div>
-
-                <!-- Blind Select Overlay -->
-                <div id="b-blind-select" class="nata-overlay">
-                    <h1>Select Blind</h1>
-                    <div class="blind-info-card">
-                        <h2 id="b-blind-name">Small Blind</h2>
-                        <p id="b-blind-desc">Score at least 300 chips</p>
-                        <div class="blind-reward">Reward: $<span id="b-blind-reward">3</span></div>
-                    </div>
-                    <div class="blind-actions">
-                        <button id="b-select-play" class="nata-btn nata-btn-primary">SELECT</button>
-                        <div class="skip-option">
-                            <button id="b-select-skip" class="nata-btn nata-btn-secondary">SKIP</button>
-                            <div class="tag-reward">Tag: <span id="b-tag-name">Free Shop</span></div>
-                        </div>
-                    </div>
                 </div>
             </div>
         </section>
