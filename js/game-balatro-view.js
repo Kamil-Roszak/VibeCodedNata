@@ -408,11 +408,9 @@ class BalatroView {
         // Reroll
         const isFree = this.game.tags.some(t => t.id === 'tag_d6');
         const rerollBtn = document.createElement('button');
-        rerollBtn.className = 'nata-btn nata-btn-secondary';
-        rerollBtn.style.fontSize = '12px';
-        rerollBtn.style.padding = '5px 10px';
-        rerollBtn.style.width = '100%';
-        rerollBtn.innerHTML = `REROLL<br><span style="color:var(--nata-red)">$${isFree ? 0 : 5}</span>`;
+        rerollBtn.className = 'nata-btn nata-btn-secondary btn-reroll';
+        rerollBtn.style.width = '100%'; // Keep width 100% for layout
+        rerollBtn.innerHTML = `REROLL<br><span style="color:var(--b-red)">$${isFree ? 0 : 5}</span>`;
         rerollBtn.onclick = () => {
              this.game.rerollShop();
         };

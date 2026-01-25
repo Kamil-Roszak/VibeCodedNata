@@ -35,10 +35,10 @@
 
         <!-- Nata Poker (Balatro) View -->
         <section id="balatro-view" class="view-section hidden-view">
-            <button class="nata-btn nata-btn-secondary" style="position: absolute; top: 60px; left: 20px; z-index: 200; padding: 5px 15px; font-size: 14px;" data-nav="menu-view">Exit</button>
+            <button class="nata-btn nata-btn-secondary" style="position: absolute; top: 10px; left: 10px; z-index: 200; padding: 5px 10px; font-size: 10px;" data-nav="menu-view">Exit</button>
 
-            <div class="balatro-container">
-                <!-- Top: Jokers -->
+            <div class="balatro-game-container">
+                <!-- Top Section: Jokers & Consumables -->
                 <div class="balatro-top-bar">
                     <div id="b-jokers-area" class="joker-slots">
                         <!-- Filled by JS -->
@@ -46,70 +46,80 @@
                     <div id="b-consumables-area" class="consumable-slots">
                         <!-- Consumables -->
                     </div>
-                    <div class="round-info">
-                        <div class="info-box">
-                            <span class="label">Round</span>
-                            <span id="b-round" class="value">1</span>
-                        </div>
-                        <div class="info-box">
-                            <span class="label">Money</span>
-                            <span id="b-money" class="value">$0</span>
-                        </div>
-                    </div>
                 </div>
 
-                <!-- Middle: Score -->
-                <div class="balatro-score-area">
-                    <div id="b-hand-preview" class="hand-preview-box hidden">
-                        <div class="hand-name" id="b-preview-name">High Card</div>
-                        <div class="hand-level" id="b-preview-level">lvl.1</div>
-                        <div class="hand-score">
-                            <span id="b-preview-chips" class="score-chips">10</span>
-                            <span class="x">X</span>
-                            <span id="b-preview-mult" class="score-mult">1</span>
+                <!-- Main Section: HUD & Board -->
+                <div class="balatro-main-area">
+                    <!-- Left HUD -->
+                    <div class="balatro-hud-column">
+                        <div class="hud-panel panel-score-target">
+                            <div class="hud-label">Score at least</div>
+                            <div id="b-target-score" class="hud-value-large">300</div>
+                        </div>
+
+                        <div class="hud-panel panel-current-score">
+                            <div class="hud-label">Round Score</div>
+                            <div class="score-display-mini">
+                                <span id="b-chips" class="score-chips">0</span> X <span id="b-mult" class="score-mult">0</span>
+                            </div>
+                            <div id="b-current-score" class="score-total-large">0</div>
+                        </div>
+
+                         <!-- Hand Preview floats here or inside current score -->
+                        <div id="b-hand-preview" class="hand-preview-mini hidden">
+                            <div id="b-preview-name">High Card</div>
+                            <div id="b-preview-level">lvl.1</div>
+                            <div>
+                                <span id="b-preview-chips">10</span> X <span id="b-preview-mult">1</span>
+                            </div>
+                        </div>
+
+                        <div class="hud-row">
+                             <div class="hud-panel panel-blue">
+                                <div class="hud-label">Hands</div>
+                                <div id="b-hands-left" class="hud-value">4</div>
+                             </div>
+                             <div class="hud-panel panel-red">
+                                <div class="hud-label">Discards</div>
+                                <div id="b-discards-left" class="hud-value">3</div>
+                             </div>
+                        </div>
+
+                        <div class="hud-panel panel-gold">
+                            <div class="hud-label">Money</div>
+                            <div id="b-money" class="hud-value">$4</div>
+                        </div>
+
+                        <div class="hud-panel panel-ante">
+                            <div class="hud-label">Ante</div>
+                            <div id="b-round" class="hud-value">1/8<br>Small Blind</div>
                         </div>
                     </div>
 
-                    <div class="score-display">
-                        <div class="score-row">
-                            <span id="b-chips" class="score-chips">0</span>
-                            <span class="x">X</span>
-                            <span id="b-mult" class="score-mult">0</span>
+                    <!-- Center/Right Board -->
+                    <div class="balatro-board-column">
+                        <div id="b-play-slots" class="play-slots-area"></div>
+
+                        <div class="hand-controls-row">
+                            <div id="b-hand-area" class="hand-cards-area"></div>
+
+                            <div class="controls-area">
+                                <div id="b-deck-area" class="deck-area"></div>
+                                <div class="action-buttons-col">
+                                    <button id="b-play-btn" class="nata-btn nata-btn-primary btn-play">PLAY</button>
+                                    <button id="b-discard-btn" class="nata-btn nata-btn-red btn-discard">DISCARD</button>
+                                </div>
+                                <div class="sort-buttons-col">
+                                    <button id="b-sort-rank" class="btn-sort">Rank</button>
+                                    <button id="b-sort-suit" class="btn-sort">Suit</button>
+                                </div>
+                            </div>
                         </div>
-                        <div class="score-total" id="b-current-score">0</div>
-                    </div>
-                    <div class="target-display">
-                        Target: <span id="b-target-score">300</span>
-                    </div>
-                </div>
-
-                <!-- Bottom: Play Area & Hand -->
-                <div class="balatro-play-area">
-                    <!-- Cards selected to play appear here visually? Or just highlighted in hand?
-                         Balatro moves them up. Let's replicate that. -->
-                    <div id="b-play-slots" class="card-row play-slots"></div>
-
-                    <div class="action-row">
-                        <div id="b-deck-area"></div>
-
-                        <div class="action-buttons">
-                            <button id="b-play-btn" class="nata-btn nata-btn-primary">PLAY HAND (<span id="b-hands-left">4</span>)</button>
-                            <button id="b-discard-btn" class="nata-btn nata-btn-secondary">DISCARD (<span id="b-discards-left">4</span>)</button>
-                        </div>
-
-                        <div class="sort-buttons control-panel">
-                            <button id="b-sort-rank" class="nata-btn nata-btn-blue" style="font-size: 12px; padding: 5px 15px;">Sort Rank</button>
-                            <button id="b-sort-suit" class="nata-btn nata-btn-blue" style="font-size: 12px; padding: 5px 15px;">Sort Suit</button>
-                        </div>
-                    </div>
-
-                    <div id="b-hand-area" class="card-row hand-area">
-                        <!-- Cards -->
                     </div>
                 </div>
 
                 <!-- Shop Overlay -->
-                <div id="b-shop-overlay" class="nata-overlay" style="width: 80%; max-width: 800px;">
+                <div id="b-shop-overlay" class="nata-overlay" style="width: 90%; max-width: 900px;">
                     <h1>Nata Shop</h1>
                     <p>Money: <span id="b-shop-money">$0</span></p>
                     <div id="b-shop-items" class="shop-items-grid"></div>
