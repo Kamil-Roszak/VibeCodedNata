@@ -86,13 +86,16 @@
     z-index: 100;
     opacity: 0;
     pointer-events: none;
-    transition: opacity 0.3s ease, transform 0.3s ease;
+    visibility: hidden;
+    transition: opacity 0.3s ease, transform 0.3s ease, visibility 0s linear 0.3s;
 }
 
 .nata-overlay.visible {
     opacity: 1;
     pointer-events: auto;
+    visibility: visible;
     transform: translate(-50%, -50%) scale(1);
+    transition: opacity 0.3s ease, transform 0.3s ease, visibility 0s;
 }
 
 .nata-overlay h1, .nata-overlay h2 {
