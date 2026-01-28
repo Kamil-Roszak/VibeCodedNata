@@ -1,0 +1,27 @@
+{
+  "name": "app",
+  "version": "1.0.0",
+  "description": "A mobile-friendly web game created for Nata Cola. Catch the falling bottles in your crate and achieve the highest score!",
+  "main": "index.js",
+  "directories": {
+    "test": "tests"
+  },
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/Kamil-Roszak/VibeCodedNata.git"
+  },
+  "keywords": [],
+  "author": "",
+  "license": "ISC",
+  "type": "commonjs",
+  "bugs": {
+    "url": "https://github.com/Kamil-Roszak/VibeCodedNata/issues"
+  },
+  "homepage": "https://github.com/Kamil-Roszak/VibeCodedNata#readme",
+  "devDependencies": {
+    "@playwright/test": "^1.58.0"
+  }
+}

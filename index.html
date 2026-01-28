@@ -26,7 +26,7 @@
                 <div class="menu-buttons">
                     <button class="nata-btn nata-btn-primary" data-nav="game-view">PLAY NATA CATCH</button>
                     <button class="nata-btn nata-btn-primary" data-nav="level-select-view">PLAY NATA CRUSH</button>
-                    <button class="nata-btn nata-btn-blue" data-nav="balatro-view" onclick="startBalatro()">PLAY NATA POKER</button>
+                    <button class="nata-btn nata-btn-blue" data-nav="balatro-view">PLAY NATA POKER</button>
                     <button class="nata-btn nata-btn-secondary" data-nav="shop-view">BADGE SHOP</button>
                     <button class="nata-btn nata-btn-secondary" data-nav="profile-view">MY PROFILE</button>
                 </div>
@@ -38,6 +38,7 @@
             <button class="nata-btn nata-btn-secondary" style="position: absolute; top: 60px; left: 20px; z-index: 200; padding: 5px 15px; font-size: 14px;" data-nav="menu-view">Exit</button>
 
             <div class="balatro-container">
+                <canvas id="balatro-canvas"></canvas>
                 <!-- Top: Jokers -->
                 <div class="balatro-top-bar">
                     <div id="b-jokers-area" class="joker-slots">
@@ -255,7 +256,8 @@
     <script src="js/balatro-data.js"></script>
     <script src="js/game-balatro-poker.js"></script>
     <script src="js/game-balatro-core.js"></script>
-    <script src="js/game-balatro-view.js"></script>
+    <!-- <script src="js/game-balatro-view.js"></script> -->
+    <script src="js/game-balatro-three-view.js"></script>
 
     <script src="js/app.js"></script>
 </body>
